@@ -1,0 +1,106 @@
+﻿@page "/admin/course/structure"
+@page "/admin/course/structure/option/{id:int}"
+@inject ICourseStructureService courseStructureService
+@inject IDepartmentOptionService departmentOptionService
+@inject ICourseService courseService
+@inject IToastService toastService
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Course Structure</PageTitle>
+
+<div class="border m-0 p-3 rounded-3">
+    @if (loading)
+    {
+       @* <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else if (Id is null)
+    {
+        <CourseStructureDepartmentOptionListComponent />
+    }
+    else
+    {
+        @if (!isValidOptionId)
+        {
+            <h3 class="alert alert-info">@message</h3>
+        }
+        else
+        {
+            <CourseStructureListComponent DepartmentOptionId=@department.Id DepartmentOptionName=@department.Name />
+            <p></p>
+            @if (!addMoreCourses)
+            {
+                <button type="button" class="btn btn-primary" @onclick="AddNewCourses">
+                    @*<i class="oi oi-plus"></i>*@
+                    Add New
+                </button>
+
+            }
+            else
+            {
+                <hr />
+                <p></p>
+                <CourseStructureAddComponent DepartmentOptionId=department.Id/>
+
+                <p></p>
+                <button type="button" class="btn btn-danger" @onclick="CancelAddNewCourses">
+                    Cancel
+                </button>
+                <hr />
+            }
+        }
+    }
+</div>
+
+@code {
+
+    bool loading = true;
+    bool proceed = false;
+    bool addMoreCourses = false;
+    bool isValidOptionId = false;
+    string message = "Loading List of Courses...";
+
+    DepartmentOptionReadDto department = new DepartmentOptionReadDto();
+    [CascadingParameter] Error error { get; set; }
+    [Parameter] public int? Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (Id is not null)
+            {
+                var response = await departmentOptionService.GetDepartmentOption((int)Id);
+                if (response.Data is not null)
+                {
+                    department = response.Data;
+                    await courseStructureService.GetListOfCourses((int)Id);
+                    isValidOptionId = true;
+                }
+                else
+                {
+                    message = $"There is no programme with option Id = '{Id.ToString()}'";
+                }
+            }
+            else
+            {
+                await departmentOptionService.GetDepartmentOptions();
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task AddNewCourses()
+    {
+        addMoreCourses = true;
+    }
+
+    private async Task CancelAddNewCourses()
+    {
+        addMoreCourses = false;
+    }
+}

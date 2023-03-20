@@ -1,0 +1,259 @@
+﻿@page "/admin/department/{id:int}"
+@inject IDepartmentService departmentService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Department</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    @if (loading)
+    {
+      @*  <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <h3 class="my-main-title">Edit Department - "@department.Name" -- Faculty of @FacultyName</h3><hr />
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-5" @onclick="@(() => BackToDepartments())">
+            Dept...
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br />
+        <br />
+        <br />
+
+        <EditForm Model="department" OnValidSubmit="AddOrUpdateDepartment" class="was-validated">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+
+            <div class="my-header row">
+                <div class="col-10"></div>
+                <div class="col-5">Department</div>
+                <div class="col-3">Abbrv</div>
+                <div class="col-1 text-align:center">Active</div>
+                <div class="col-1"></div>
+            </div>
+            <div class="row">
+                <div class="col-10"></div>
+                <div class="col-5">
+                    <InputText id="departmentName" @bind-Value="department.Name" class="form-control" 
+                        placeholder="Enter Department" maxlength="50" required>
+                    </InputText>
+                    <ValidationMessage For="@(() => department.Name)" />
+                    <div class="invalid-feedback">Please enter the department name</div>
+                </div>
+                <div class="col-3">
+                    <InputText id="departmentAbbreviation" @bind-Value="department.Abbreviation" class="form-control"
+                        placeholder="Abbreviation" maxlength="3"  required>
+                    </InputText>
+                    <ValidationMessage For="@(() => department.Abbreviation)" />
+                    <div class="invalid-feedback">Please enter the abbreviation</div>
+                </div>
+                <div class="col-1 col-visible">
+                    <InputCheckbox @bind-Value="department.IsActive" class="form-check-input my-check-box"></InputCheckbox>
+                </div>
+                <div class="col-1">
+                </div>
+            </div>
+            <hr>
+
+            @if (!department.IsNew)
+            {
+                <div class="my-header row">
+                    <div class="col-10"></div>
+                    <div class="col-5">Option</div>
+                    <div class="col-3">Abbrv</div>
+                    <div class="col-1 text-align:center">Active</div>
+                    <div class="col-1"></div>
+                </div>
+
+                @foreach (var option in department.Options)
+                {
+                    <div class="row">
+                        <div class="col-10"></div>
+                        <div class="col-5">
+                            <InputText id="optionName" @bind-Value="option.Name" class="form-control"
+                                disabled="@option.IsDeleted"  placeholder="Enter Option Name" maxlength="50" required>
+                            </InputText>
+                            <ValidationMessage For="@(() => option.Name)" />
+                            <div class="invalid-feedback">Please enter the option name</div>
+                        </div>
+                        <div class="col-3">
+                            <InputText id="optionAbbreviation" @bind-Value="option.Abbreviation" class="form-control" 
+                                disabled="@option.IsDeleted" placeholder="Abbreviation" maxlength="3" required>
+                            </InputText>
+                            <ValidationMessage For="@(() => option.Abbreviation)" />
+                            <div class="invalid-feedback">Please enter the abbreviation</div>
+                        </div>
+                        <div class="col-1 col-visible">
+                            <InputCheckbox @bind-Value="option.IsActive" class="form-check-input my-check-box" 
+                                disabled="@option.IsDeleted">
+                            </InputCheckbox>
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-danger" disabled="@option.IsDeleted"
+                                @onclick="@(() => RemoveOption(option))" title="Delete Option">
+                                <i class="oi oi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+                <button type="button" class="btn btn-primary mt-3" @onclick="AddOption">
+                    <i class="oi oi-plus"></i> Add Option
+                </button>
+                <hr />
+            }
+            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+        </EditForm>
+        @if (!department.IsNew)
+        {
+            <button type="button" class="btn btn-danger float-start" @onclick="DeleteDepartment">
+                Delete Dept
+            </button>
+        }
+        <br /><br />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private int FacultyId { get; set; }
+    private string FacultyName { get; set; } = string.Empty;
+    Department department = new Department();
+
+    bool loading = true;
+    string btnSubmitButtonText = "";
+    string message = "Loading...";
+    
+    [CascadingParameter] public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (Id <= 0)
+            {
+                message = $"Department with Id '{Id}' does not exist!";
+                return;
+            }
+            var result = await departmentService.GetAdminDepartment(Id);
+            var dbDepartmentResponse = result.Data;
+            if (dbDepartmentResponse == null || dbDepartmentResponse.Department == null)
+            {
+                message = $"Department with Id '{Id}' does not exist!";
+                return;
+            }
+            FacultyName = dbDepartmentResponse.FacultyName;
+            FacultyId = dbDepartmentResponse.FacultyId;
+            department = dbDepartmentResponse.Department;
+            department.IsEditing = true;
+            btnSubmitButtonText = "Update Dept";
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void RemoveOption(DepartmentOption option)
+    {
+        try
+        {
+            if (option.IsNew)
+            {
+                department.Options.Remove(option);
+            }
+            else
+            {
+                var oldOption = department.Options.Find(o => o.Id == option.Id);
+
+                if (oldOption == null)
+                {
+                    return;
+                }
+                oldOption.IsDeleted = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void AddOption()
+    {
+        try
+        {
+            department.Options
+                .Add(new DepartmentOption { IsNew = true, DepartmentId = department.Id });
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void AddOrUpdateDepartment()
+    {
+        try
+        {
+            if (department.IsNew)
+            {
+                var result = await departmentService.CreateDepartment(department);
+                navigationManager.NavigateTo($"admin/department/{result.Id}");
+
+                toastService.ShowSuccess($"New department '{result.Name}' was created successfully.");
+            }
+            else
+            {
+                department.IsNew = false;
+                department = await departmentService.UpdateDepartment(department);
+                navigationManager.NavigateTo($"admin/department/{department.Id}");
+
+                toastService.ShowSuccess($"{department.Name} was updated successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void DeleteDepartment()
+    {
+        try
+        {
+            bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
+                $"Do you really want to delete '{department.Name}' and all the options in '{department.Name}'?");
+            if (confirmed)
+            {
+                await departmentService.DeleteDepartment(department);
+                navigationManager.NavigateTo($"admin/departments/{FacultyId}");
+
+                toastService.ShowInfo($"{department.Name} was deleted successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void BackToFaculties()
+    {
+        navigationManager.NavigateTo("admin/faculties");
+    }
+
+    private void BackToDepartments()
+    {
+        navigationManager.NavigateTo($"admin/departments/{FacultyId}");
+    }
+}

@@ -1,0 +1,17 @@
+﻿@page "/admin/account"
+@using Eduversity.com.Client.Pages.LoginPages
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Admin Account</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized> 
+        
+        <ChangePassword ChangeUserPassword=false />
+        <p></p>
+    </Authorized>
+    <NotAuthorized>
+       <UnAuthorizedPrompt />
+    </NotAuthorized>
+</AuthorizeView>
+

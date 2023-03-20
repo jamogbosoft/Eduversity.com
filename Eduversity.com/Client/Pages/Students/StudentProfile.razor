@@ -1,0 +1,19 @@
+﻿@page "/student/profile"
+@using Eduversity.com.Client.Pages.LoginPages
+@attribute [Authorize(Roles ="Student")]
+
+<PageTitle>Student Profile</PageTitle>
+
+<AuthorizeView Roles="Student">
+    <Authorized>       
+        <StudentMainComponent />
+        <p></p>
+        <UserAddressComponent /> 
+        <p></p>
+        <ChangePassword ChangeUserPassword=false />
+        <p></p>
+    </Authorized>
+    <NotAuthorized>
+       <UnAuthorizedPrompt />
+    </NotAuthorized>
+</AuthorizeView>

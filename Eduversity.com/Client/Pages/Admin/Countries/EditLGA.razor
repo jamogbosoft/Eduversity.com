@@ -1,0 +1,182 @@
+﻿@page "/admin/lga/{id:int}"
+@inject ILGAService lgaService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>LGA</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    @if (loading)
+    {
+       @* <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <h3 class="my-main-title">Edit LGA - "@lga.Name" in @StateName, @CountryName</h3><hr />
+
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+            Countries
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-1" @onclick="@(() => BackToStates())">
+            States
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToLGAs())">
+            LGAs
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br />
+
+        <br />
+
+        <br />
+
+        <EditForm Model="lga" OnValidSubmit="AddOrUpdateLGA" class="was-validated">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+
+            <div class="my-header row">
+                <div class="col">LGA</div>
+                <div class="col text-align:center">Active</div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <InputText id="lgaName" @bind-Value="lga.Name" class="form-control" 
+                        placeholder="Enter LGA" maxlength="30" required>
+                    </InputText>
+                    <ValidationMessage For="@(() => lga.Name)" />
+                    <div class="invalid-feedback">Please enter the LGA name</div>
+                </div>
+                <div class="col col-visible">
+                    <InputCheckbox @bind-Value="lga.IsActive" class="form-check-input my-check-box"></InputCheckbox>
+                </div>
+            </div>
+            <hr>
+
+            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+        </EditForm>
+        @if (!lga.IsNew)
+        {
+            <button type="button" class="btn btn-danger float-start" @onclick="DeleteLGA">
+                Delete LGA
+            </button>
+        }
+        <br />
+
+        <br />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public int StateId { get; set; }
+    public string StateName { get; set; } = string.Empty;
+    public int CountryId { get; set; }
+    public string CountryName { get; set; } = string.Empty;
+
+
+    LGA lga = new LGA();
+    bool loading = true;
+    string btnSubmitButtonText = "";
+    string message = "Loading...";
+
+    [CascadingParameter] public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (Id <= 0)
+            {
+                message = $"LGA with Id '{Id}' does not exist!";
+                return;
+            }
+            var result = await lgaService.GetAdminLGA(Id);
+            var dbLGAResponse = result.Data;
+            if (dbLGAResponse == null || dbLGAResponse.LGA == null)
+            {
+                message = $"LGA with Id '{Id}' does not exist!";
+                return;
+            }
+            StateId = dbLGAResponse.StateId;
+            StateName = dbLGAResponse.StateName;
+            CountryId = dbLGAResponse.CountryId;
+            CountryName = dbLGAResponse.CountryName;
+
+            lga = dbLGAResponse.LGA;
+            lga.IsEditing = true;
+            btnSubmitButtonText = "Update LGA";
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void AddOrUpdateLGA()
+    {
+        try
+        {
+            if (lga.IsNew)
+            {
+                var result = await lgaService.CreateLGA(lga);
+                navigationManager.NavigateTo($"admin/lga/{result.Id}");
+
+                toastService.ShowSuccess($"New LGA '{result.Name}' was created successfully.");
+            }
+            else
+            {
+                lga.IsNew = false;
+                lga = await lgaService.UpdateLGA(lga);
+                navigationManager.NavigateTo($"admin/lga/{lga.Id}");
+
+                toastService.ShowSuccess($"{lga.Name} was updated successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void DeleteLGA()
+    {
+        try
+        {
+            bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
+                $"Do you really want to delete '{lga.Name}'?");
+            if (confirmed)
+            {
+                await lgaService.DeleteLGA(lga);
+                navigationManager.NavigateTo($"admin/lgas/{StateId}");
+
+                toastService.ShowInfo($"{lga.Name} was deleted successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void BackToCountries()
+    {
+        navigationManager.NavigateTo("admin/countries");
+    }
+
+    private void BackToStates()
+    {
+        navigationManager.NavigateTo($"admin/states/{CountryId}");
+    }
+
+    private void BackToLGAs()
+    {
+        navigationManager.NavigateTo($"admin/lgas/{StateId}");
+    }
+}

@@ -1,0 +1,166 @@
+﻿@page "/admin/departments/{facultyId:int}"
+@inject IDepartmentService departmentService
+@inject IToggleService toggleService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Departments</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    <h3 class="my-main-title">Departments in @FacultyName</h3><hr />
+
+    @if (loading)
+    {
+        @*<span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th width="20px"></th>
+                    <th>Department</th>
+                    <th style="text-align:center">Active</th>
+                    <th style="text-align:center">Edit Depts</th>
+                    <th style="text-align:center">View Opts</th>
+                </tr>
+            </thead>
+            <tbody class="@toggleService.NavMenuCssClass">
+                <Virtualize Items="departmentService.AdminResponse.Departments" Context="departments">
+                    <tr>
+                        <td width="5px">
+                            <div>
+                                <a class="nav-link px-1" @onclick="() => toggleService.TogleSubmenu(departments.Id)">
+                                    @if (departments.Id == toggleService.NavSubmenuId && departments.Options.Count != 0)
+                                    {
+                                        <span class="oi oi-minus" aria-hidden="true"></span>
+                                    }
+                                    else if (departments.Options.Count != 0)
+                                    {
+                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                    }
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <span>@departments.Name - (@departments.Abbreviation)</span>
+                            <div class="px-6">
+                                @if (departments.Id == toggleService.NavSubmenuId)
+                                {
+                                    @if (departments.Options.Count != 0)
+                                    {
+                                        <table class="table table-striped table-sm border">
+                                            <thead>
+                                                <tr>
+                                                    <th>Options</th>
+                                                    <th style="text-align:center">Active</th>
+                                                    <th style="text-align:center">Edit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var option in departments.Options)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <span>@option.Name - (@option.Abbreviation)</span>
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            <span>@(option.IsActive ? "✔️" : "❌")</span>
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            <span>
+                                                                <a class="btn btn-outline-primary btn-sm" title="Edit Option" @onclick="(() => EditOption(option.Id))">
+                                                                    <i class="oi oi-pencil"></i>
+                                                                </a>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td style="text-align:center">@(departments.IsActive ? "✔️" : "❌")</td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="(() => EditDepartment(departments.Id))" title="Edit Department">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                        </td>
+                        <td style="text-align:center">
+                            <button class="btn btn-outline-success btn-sm position-relative" @onclick="(() => ViewOptions(departments.Id))" title="View Options">
+                                <i class="oi oi-eye"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: teal;">
+                                    @departments.Options.Count
+                                </span>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br /><br />
+    }
+
+</div>
+@code {
+    [Parameter]
+    public int FacultyId { get; set; }
+    private string FacultyName { get; set; } = string.Empty;
+
+    bool loading = true;
+    string message = "Loading Departments...";
+
+    [CascadingParameter]
+    Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            await departmentService.GetAdminDepartments(FacultyId);
+            message = departmentService.Message;
+            if (departmentService.AdminResponse.Departments == null || departmentService.AdminResponse.FacultyId == 0)
+            {
+                return;
+            }
+            FacultyName = departmentService.AdminResponse.FacultyName;
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void EditDepartment(int departmentId)
+    {
+        navigationManager.NavigateTo($"admin/department/{departmentId}");
+    }
+
+    void EditOption(int optionId)
+    {
+        navigationManager.NavigateTo($"admin/department/option/{optionId}");
+    }
+
+    void ViewOptions(int departmentId)
+    {
+        navigationManager.NavigateTo($"admin/department/options/{departmentId}");
+    }
+
+    private void BackToFaculties()
+    {
+        navigationManager.NavigateTo("admin/faculties");
+    }
+}

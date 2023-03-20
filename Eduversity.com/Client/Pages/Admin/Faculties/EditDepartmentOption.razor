@@ -1,0 +1,185 @@
+﻿@page "/admin/department/option/{id:int}"
+@inject IDepartmentOptionService departmentOptionService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Department Option</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    @if (loading)
+    {
+       @* <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <h3 class="my-main-title">Edit Option - "@option.Name", Department of @DepartmentName, Faculty of @FacultyName</h3><hr />
+
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-1" @onclick="@(() => BackToDepartments())">
+            Depts
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToOptions())">
+            Opts
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br />
+
+        <br />
+
+        <br />
+
+        <EditForm Model="option" OnValidSubmit="AddOrUpdateOption" class="was-validated">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+
+            <div class="my-header row">
+                <div class="col-10"></div>
+                <div class="col-5">Option</div>
+                <div class="col-3">Abbrv</div>
+                <div class="col-2 text-align:center">Active</div>
+            </div>
+            <div class="row">
+                <div class="col-10"></div>
+                <div class="col-5">
+                    <InputText id="optionName" @bind-Value="option.Name" class="form-control" placeholder="Enter Option Name" maxlength="50" required></InputText>
+                    <ValidationMessage For="@(() => option.Name)" />
+                    <div class="invalid-feedback">Please enter the option name</div>
+                </div>
+                <div class="col-3">
+                    <InputText id="optionAbbreviation" @bind-Value="option.Abbreviation" class="form-control" placeholder="Abbreviation" maxlength="3" required></InputText>
+                    <ValidationMessage For="@(() => option.Abbreviation)" />
+                    <div class="invalid-feedback">Please enter the abbreviation</div>
+                </div>
+                <div class="col-2 col-visible">
+                    <InputCheckbox @bind-Value="option.IsActive" class="form-check-input my-check-box"></InputCheckbox>
+                </div>
+            </div>
+            <hr>
+
+            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+        </EditForm>
+        @if (!option.IsNew)
+        {
+            <button type="button" class="btn btn-danger float-start" @onclick="DeleteOption">
+                Delete Option
+            </button>
+        }
+        <br /><br />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public int DepartmentId { get; set; }
+    private int FacultyId { get; set; }
+    private string DepartmentName { get; set; } = string.Empty;
+    private string FacultyName { get; set; } = string.Empty;
+
+    DepartmentOption option = new DepartmentOption();
+    bool loading = true;
+    string btnSubmitButtonText = "";
+    string message = "Loading...";
+
+    [CascadingParameter] public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (Id <= 0)
+            {
+                message = $"Option with Id '{Id}' does not exist!";
+                return;
+            }
+            var result = await departmentOptionService.GetAdminDepartmentOption(Id);
+            var dbOptionResponse = result.Data;
+            if (dbOptionResponse == null || dbOptionResponse.Option == null)
+            {
+                message = $"Option with Id '{Id}' does not exist!";
+                return;
+            }
+            DepartmentId = dbOptionResponse.DepartmentId;
+            DepartmentName = dbOptionResponse.DepartmentName;
+            FacultyId = dbOptionResponse.FacultyId;
+            FacultyName = dbOptionResponse.FacultyName;
+
+            option = dbOptionResponse.Option;
+            option.IsEditing = true;
+            btnSubmitButtonText = "Update Option";
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void AddOrUpdateOption()
+    {
+        try
+        {
+            if (option.IsNew)
+            {
+                var result = await departmentOptionService.CreateDepartmentOption(option);
+                navigationManager.NavigateTo($"admin/department/option/{result.Id}");
+
+                toastService.ShowSuccess($"New option '{result.Name}' was created successfully.");
+            }
+            else
+            {
+                option.IsNew = false;
+                option = await departmentOptionService.UpdateDepartmentOption(option);
+                navigationManager.NavigateTo($"admin/department/option/{option.Id}");
+
+                toastService.ShowSuccess($"{option.Name} was updated successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void DeleteOption()
+    {
+        try
+        {
+            bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
+                $"Do you really want to delete '{option.Name}'?");
+            if (confirmed)
+            {
+                await departmentOptionService.DeleteDepartmentOption(option);
+                navigationManager.NavigateTo($"admin/department/options/{DepartmentId}");
+
+                toastService.ShowInfo($"{option.Name} was deleted successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void BackToFaculties()
+    {
+        navigationManager.NavigateTo("admin/faculties");
+    }
+
+    private void BackToDepartments()
+    {
+        navigationManager.NavigateTo($"admin/departments/{FacultyId}");
+    }
+
+    private void BackToOptions()
+    {
+        navigationManager.NavigateTo($"admin/department/options/{DepartmentId}");
+    }
+}

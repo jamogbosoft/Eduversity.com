@@ -1,0 +1,103 @@
+﻿@inject IFacultyService facultyService
+@inject IDepartmentService departmentService
+@attribute [Authorize]
+
+@if (loading)
+{
+    <span>@message</span>
+}
+else
+{
+    <EditForm Model="lecturer" class="was-validated">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label for="inputFaculty">Faculty</label>
+                <InputSelect class="form-select" id="inputFaculty"
+                         ValueExpression="@(()=>lecturer.AcademicDetail.FacultyId)" Value="@lecturer.AcademicDetail.FacultyId"
+                         ValueChanged="@((int value) => OnFacultyValueChanged(value))" required>
+                    <option value="0">Select Faculty...</option>
+                    @foreach (var faculty in facultyService.Faculties)
+                    {
+                        <option value="@faculty.Id">@faculty.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <label for="inputDepartment">Department</label>
+                <InputSelect class="form-select" id="inputDepartment"
+                         ValueExpression="@(()=>lecturer.AcademicDetail.DepartmentId)" Value="@lecturer.AcademicDetail.DepartmentId"
+                         ValueChanged="@((int value) => OnDepartmentValueChanged(value))" required>
+                    <option value="0">Select Department...</option>
+                    @foreach (var department in departmentService.Departments)
+                    {
+                        <option value="@department.Id">@department.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        <hr>
+    </EditForm>
+}
+
+@code {
+
+    bool loading = true;
+    string message = "Loading ...";
+
+    [Parameter]
+    public LecturerResponse lecturer { get; set; } = null!;
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            facultyService.FacultiesChanged += StateHasChanged;
+            departmentService.DepartmentsChanged += StateHasChanged;
+
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    public void Dispose()
+    {
+        facultyService.FacultiesChanged -= StateHasChanged;
+        departmentService.DepartmentsChanged -= StateHasChanged;
+    }
+
+    private async Task OnFacultyValueChanged(int value)
+    {
+        try
+        {
+            lecturer.AcademicDetail.DepartmentId = 0;
+            lecturer.AcademicDetail.FacultyId = value;
+            await departmentService.GetDepartments(value);
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task OnDepartmentValueChanged(int value)
+    {
+        try
+        {
+            lecturer.AcademicDetail.DepartmentId = value;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

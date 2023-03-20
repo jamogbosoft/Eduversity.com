@@ -1,0 +1,96 @@
+﻿@page "/department/students"
+@page "/department/students/search/{searchText}/{page:int}"
+@page "/department/student/{userId:long}"
+@inject IStudentService studentService
+@attribute [Authorize(Roles = "HOD")]
+
+<PageTitle>@pageTitle</PageTitle>
+
+@if (loading)
+{
+    <Loading Message=@message></Loading>
+}
+else{
+
+    <SearchStudents OptionId=@HOD_OptionId From=@me />
+    <p></p>
+
+    @if (UserId is not null)
+    {
+        <StudentDetailStaticForm student=@student />
+        <p></p>   
+        <UserAddressComponent UserId=(long)UserId />
+    }
+    else
+    {
+        <StudentsList From=@me />
+    }
+    <p></p>
+}
+
+@code {
+    bool loading = true;
+    string pageTitle = string.Empty;
+    string message = "Loading Students...";    
+    string me = "department";
+
+    int HOD_OptionId { get; set; } = 2; //  MODIFY LATER
+
+    [Parameter]
+    public int? OptionId { get; set; }
+
+    [Parameter]
+    public string? Session { get; set; } = null;
+
+    [Parameter]
+    public int? Level { get; set; }
+
+    [Parameter]
+    public long? UserId { get; set; }
+
+    [Parameter]
+    public string? SearchText { get; set; } = null;
+
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+    [CascadingParameter]
+    public Error error { get; set; } = new();
+
+    StudentResponse student = null!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (UserId is not null)
+            {
+                pageTitle = "Student";
+                var result = await studentService.GetStudent((long)UserId);
+                student = result.Data!;
+            }
+            else
+            {
+                pageTitle = "Students";
+                if (SearchText is not null)
+                {
+                    await studentService.SearchStudents(SearchText, Page, HOD_OptionId);
+                }
+                else if (Session is not null)
+                {
+                    await studentService.GetStudents(HOD_OptionId, Session, (int)Level!);
+                }
+                else
+                {
+                    await studentService.GetStudents(HOD_OptionId);
+                }                
+            }
+
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

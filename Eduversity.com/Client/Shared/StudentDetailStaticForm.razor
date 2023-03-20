@@ -1,0 +1,85 @@
+﻿@inject IGenderService genderService
+@inject IMaritalStatusService maritalStatusService
+@inject IPassportService passportService
+@attribute [Authorize(Roles = "Admin,Student,HOD")]
+
+@if (loading)
+{
+    <span>@message</span>
+}
+else
+{
+    <div class="row card-details">
+        <div class="col-sm-6 mb-3">
+            <img src="@(student.Image != string.Empty? student.Image: passportService.DefaultImage)" class="form-control my-passport">
+            <span><strong>@student.LastName, @student.FirstName @student.MiddleName</strong></span><br /><br>
+            <span><strong>Gender:</strong> @GetGender()</span><br />
+            <span><strong>Marital Status:</strong> @GetMaritalStatus()</span><br />
+            <span><strong>Date of Birth:</strong> @student.DateOfBirth.ToLongDateString() </span><br />
+            <span><strong>Place of Birth:</strong> @student.PlaceOfBirth </span><br />
+        </div>
+        <div class="col-sm-6">
+            <span><strong>Reg. Number:</strong> @student.AcademicDetail.RegNumber</span><br />
+            <span><strong>Faculty:</strong> @student.AcademicDetail.FacultyName</span><br />
+            <span><strong>Department:</strong> @student.AcademicDetail.DepartmentName</span><br />
+            <span><strong>Option:</strong> @student.AcademicDetail.DepartmentOptionName</span><br />
+            <span><strong>Current Session:</strong> @student.AcademicDetail.Session</span><br />
+            <span><strong>Current Level:</strong> @(student.AcademicDetail.Level != 0 ? student.AcademicDetail.Level + "L" : "") </span><br />
+            <span><strong>Current Semester:</strong> @(student.AcademicDetail.Semester != string.Empty ? student.AcademicDetail.Semester + " Semester" : "")</span><br />
+            <span><strong>Status:</strong> @(student.AcademicDetail.Graduated ? "Graduated" : student.AcademicDetail.PassedOut ? "Out of School" : "In School")</span><br />
+        </div>
+    </div>
+}
+
+@code {
+
+    bool loading = true;
+    string message = "Loading Student's Detail...";
+
+    [Parameter]
+    public StudentResponse student { get; set; } = new();
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        loading = false;
+    }
+
+    private string GetGender()
+    {
+        try
+        {
+            var gender = genderService.Genders.FirstOrDefault(s => s.Value == student.Gender);
+            if (gender == null)
+            {
+                return student.Gender;
+            }
+            return gender.Name;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+            return string.Empty;
+        }
+    }
+
+    private string GetMaritalStatus()
+    {
+        try
+        {
+            var maritalStatus = maritalStatusService.Status.FirstOrDefault(s => s.Value == student.MaritalStatus);
+            if (maritalStatus == null)
+            {
+                return student.MaritalStatus;
+            }
+            return maritalStatus.Name;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+            return string.Empty;
+        }
+    }
+}

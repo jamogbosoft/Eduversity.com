@@ -1,0 +1,153 @@
+﻿@page "/admin/faculties"
+@inject IFacultyService facultyService
+@inject IToggleService toggleService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Faculties</PageTitle>
+<div class="border m-1 p-3 rounded-3 mb-3">
+    <h3 class="my-main-title">Faculties</h3><hr />
+
+    @if (loading)
+    {
+        @*<span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <button class="btn btn-primary float-end mb-3" @onclick="CreateFaculty">
+            <i class="oi oi-plus"></i> Add New Faculty
+        </button>
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th width="20px"></th>
+                    <th>Faculty</th>
+                    <th style="text-align:center">Active</th>
+                    <th style="text-align:center">Edit Faculty</th>
+                    <th style="text-align:center">View Depts.</th>
+                </tr>
+            </thead>
+            <tbody class="@toggleService.NavMenuCssClass">
+                <Virtualize Items="facultyService.AdminFaculties" Context="faculty">
+                    <tr>
+                        <td width="5px">
+                            <div class="row">
+                                <a class="nav-link px-1" @onclick="() => toggleService.TogleSubmenu(faculty.Id)">
+                                    @if (faculty.Id == toggleService.NavSubmenuId && faculty.Departments.Count != 0)
+                                    {
+                                        <span class="oi oi-minus" aria-hidden="true"></span>
+                                    }
+                                    else if (faculty.Departments.Count != 0)
+                                    {
+                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                    }
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <span>@faculty.Name - (@faculty.Abbreviation)</span>
+                            <div class="row px-6">
+                                @if (faculty.Id == toggleService.NavSubmenuId)
+                                {
+                                    @if (faculty.Departments.Count != 0)
+                                    {
+                                        <table class="table table-striped table-sm border">
+                                            <thead>
+                                                <tr class="px-10">
+                                                    <th>Departments</th>
+                                                    <th style="text-align:center">Active</th>
+                                                    <th style="text-align:center">Edit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var department in faculty.Departments)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <span>@department.Name - (@department.Abbreviation)</span>
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            <span>@(department.IsActive ? "✔️" : "❌")</span>
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            <span>
+                                                                <a class="text-primary" title="Edit Department" @onclick="(() => EditDepartment(department.Id))">
+                                                                    <i class="oi oi-pencil"></i>
+                                                                </a>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="my-text-align-center">@(faculty.IsActive ? "✔️" : "❌")</td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-primary btn-sm" @onclick="(() => EditFaculty(faculty.Id))" title="Edit Faculty">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                        </td>
+                        <td style="text-align:center">
+                            <button class="btn btn-success btn-sm position-relative" @onclick="(() => ViewDepartments(faculty.Id))" title="View Departments">
+                                <i class="oi oi-eye"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: teal;">
+                                    @faculty.Departments.Count
+                                    <span class="visually-hidden">unread messages</span>
+                                </span>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+
+    bool loading = true;
+    string message = "Loading Faculties...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await facultyService.GetAdminFaculties();
+            if (facultyService.AdminFaculties == null)
+            {
+                message = "You have not entered any faculty.";
+                return;
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError(ex.Message);
+        }
+    }
+
+    void EditFaculty(int facultyId)
+    {
+        navigationManager.NavigateTo($"admin/faculty/{facultyId}");
+    }
+
+    void CreateFaculty()
+    {
+        navigationManager.NavigateTo("admin/faculty");
+    }
+
+    void EditDepartment(int departmentId)
+    {
+        navigationManager.NavigateTo($"admin/department/{departmentId}");
+    }
+
+    void ViewDepartments(int facultyId)
+    {
+        navigationManager.NavigateTo($"admin/departments/{facultyId}");
+    }
+}

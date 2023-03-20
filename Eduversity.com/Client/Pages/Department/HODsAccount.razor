@@ -1,0 +1,30 @@
+﻿@page "/department/account"
+@using Eduversity.com.Client.Pages.LoginPages
+@inject IDepartmentHeadService departmentHeadService
+@implements IDisposable
+@attribute [Authorize(Roles = "HOD")]
+
+<PageTitle>Department Account</PageTitle>
+
+<AuthorizeView Roles="HOD">
+    <Authorized>       
+        <h3>Head of Department, @departmentHeadService.DepartmentHead.DepartmentName</h3>
+        <ChangePassword ChangeUserPassword=false />
+        <p></p>
+    </Authorized>
+    <NotAuthorized>
+       <UnAuthorizedPrompt />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected override void OnInitialized()
+    {
+        departmentHeadService.DepartmentHeadChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        departmentHeadService.DepartmentHeadChanged -= StateHasChanged;
+    }
+}

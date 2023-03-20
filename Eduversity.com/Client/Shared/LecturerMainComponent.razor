@@ -1,0 +1,135 @@
+﻿@inject ILecturerService lecturerService
+@inject IFacultyService facultyService
+@inject IDepartmentService departmentService
+@inject IToastService _toastService
+@attribute [Authorize(Roles = "Admin,Lecturer")]
+
+<div class="border m-0 p-3 rounded-3">
+    @if (loading)
+    {
+        @* <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        @if (lecturer is null)
+        {
+            <span>
+                You haven't captured your personal detail
+                <button class="btn btn-outline-info" @onclick="InitLecturer">Add Personal Detail</button>
+            </span>
+        }
+        else if (!editLecturer)
+        {
+            <LecturerDetailStaticForm lecturer="lecturer" />
+            <button class="btn btn-primary px-5" @onclick="HandleEditLecturer">Edit</button>
+        }
+        else
+        {
+            <EditForm Model="lecturer" OnValidSubmit="SubmitLecturer" class="was-validated">
+                <DataAnnotationsValidator></DataAnnotationsValidator>
+
+                <LecturerDetailsEditForm lecturer="lecturer" />
+
+                <button class="btn btn-danger px-3" @onclick="HandleReload">Cancel</button>
+                <button type="submit" class="btn btn-success mx-3 px-3">✔️ Save</button>
+            </EditForm>
+        }
+    }
+</div>
+
+@code {
+
+    LecturerResponse lecturer = null!;
+    bool editLecturer = false;
+    bool loading = true;
+    bool canceled = false;
+
+    string message = "Loading Lecturer...";
+
+    [Parameter]
+    public long UserId { get; set; }
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            loading = true;
+            var result = UserId == 0L ?
+                await lecturerService.GetLecturer() :
+                await lecturerService.GetLecturer(UserId);
+            lecturer = result.Data!;
+
+            await facultyService.GetFaculties();
+            if (lecturer is not null)
+            {
+                await departmentService.GetDepartments(lecturer.AcademicDetail.FacultyId);
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task SubmitLecturer()
+    {
+        try
+        {
+            if (!canceled)
+            {
+                if (lecturer.AcademicDetail.DepartmentId != 0) //Validate Department InputSelect
+                {
+                    editLecturer = false;
+                    lecturer = await lecturerService.AddOrUpdateLecturer(lecturer);
+                    _toastService.ShowSuccess("Lecturer's Detail Updated Successfully");
+                }
+                else { _toastService.ShowWarning("Department can not be empty"); }
+            }
+            canceled = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void InitLecturer()
+    {
+        try
+        {
+            lecturer = new LecturerResponse();
+            editLecturer = true;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void HandleEditLecturer()
+    {
+        editLecturer = !editLecturer;
+    }
+
+    private async Task HandleReload()
+    {
+        try
+        {
+            canceled = true;
+            var result = UserId == 0L ?
+                await lecturerService.GetLecturer() :
+                await lecturerService.GetLecturer(UserId);
+            lecturer = result.Data!;
+            editLecturer = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

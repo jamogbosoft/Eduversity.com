@@ -1,0 +1,112 @@
+﻿@page "/admin/lgas/{stateId:int}"
+@inject ILGAService lgaService
+@inject IToggleService toggleService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>States</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    <h3 class="my-main-title">LGAs in @StateName, @CountryName.</h3><hr />
+
+    @if (loading)
+    {
+        @*<span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+            Countries
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-3" @onclick="@(() => BackToStates(CountryId))">
+            States
+            <i class="oi oi-caret-right"></i>
+        </button>
+
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th>LGA</th>
+                    <th style="text-align:center">Active</th>
+                    <th style="text-align:center">Edit LGA</th>
+                </tr>
+            </thead>
+            <tbody class="@toggleService.NavMenuCssClass">
+                <Virtualize Items="lgaService.AdminResponse.LGAs" Context="lga">
+                    <tr>
+                        <td>@lga.Name</td>
+                        <td style="text-align:center">@(lga.IsActive ? "✔️" : "❌")</td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="(() => EditLGA(lga.Id))" title="Edit LGA">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+            Countries
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-3" @onclick="@(() => BackToStates(CountryId))">
+            States
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br /><br />
+    }
+</div>
+
+@code {
+
+    [Parameter] public int StateId { get; set; }
+
+    private int CountryId { get; set; }
+    private string StateName { get; set; } = string.Empty;
+    private string CountryName { get; set; } = string.Empty;
+
+    bool loading = true;
+    string message = "Loading Local Governments...";
+
+    [CascadingParameter] public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            await lgaService.GetAdminLGAs(StateId);
+            message = lgaService.Message;
+            if (lgaService.AdminResponse.LGAs == null || lgaService.AdminResponse.StateId == 0)
+            {
+                return;
+            }
+            StateName = lgaService.AdminResponse.StateName;
+            CountryId = lgaService.AdminResponse.CountryId;
+            CountryName = lgaService.AdminResponse.CountryName;
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void EditLGA(int lgaId)
+    {
+        navigationManager.NavigateTo($"admin/lga/{lgaId}");
+    }
+
+    private void BackToCountries()
+    {
+        navigationManager.NavigateTo("admin/countries");
+    }
+
+    private void BackToStates(int countryId)
+    {
+        navigationManager.NavigateTo($"admin/states/{countryId}");
+    }
+}

@@ -1,0 +1,11 @@
+﻿.my-header {
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 3px dotted lightgray;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+}
+
+.my-text-align-center {
+    text-align: center;
+}

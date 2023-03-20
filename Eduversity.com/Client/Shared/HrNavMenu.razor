@@ -1,0 +1,54 @@
+﻿@inject ILocalStorageService localStorage
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager navigationManager
+
+    <SfAppBar ColorMode="AppBarColor.Primary">
+        <SfButton CssClass="e-inherit" IconCss="e-icons e-home" Content="Home"
+                  OnClick="@(() => NavigateToPage("/"))" />
+    <SfButton CssClass="e-inherit" IconCss="e-icons e-people" Content="Students"
+                  OnClick="@(() => NavigateToPage("/admin/students"))" />
+        <SfButton CssClass="e-inherit" IconCss="e-icons e-people" Content="Lecturers"
+                  OnClick="@(() => NavigateToPage("/admin/lecturers"))" />
+
+        <AppBarSpacer></AppBarSpacer>
+
+        <AuthorizeView>
+            <NotAuthorized>
+            <SfButton CssClass="e-inherit" IconCss="e-icons e-user" Content="Sign-up"
+                          OnClick="@(() => NavigateToPage("/signup"))" />
+            <SfButton CssClass="e-inherit" IconCss="e-icons e-signin" Content="Login"
+                          OnClick="@(() => NavigateToPage("/signin"))" />
+            </NotAuthorized>
+            <Authorized>
+                <h6>Welcome: <i>@(context.User.Identity?.Name!)</i></h6>
+            <SfButton CssClass="e-inherit" IconCss="e-icons e-signout" Content="Logout"
+                          OnClick="@(() => Logout())" />
+            </Authorized>
+        </AuthorizeView>
+
+    </SfAppBar>
+
+
+@code {
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    private async Task Logout()
+    {
+        try
+        {
+            await localStorage.RemoveItemAsync("authToken");
+            await authenticationStateProvider.GetAuthenticationStateAsync();
+            navigationManager.NavigateTo("/signin");
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void NavigateToPage(string page)
+    {
+        navigationManager.NavigateTo(page);
+    }
+}

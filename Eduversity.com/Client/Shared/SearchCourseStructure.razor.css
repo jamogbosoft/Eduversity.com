@@ -1,0 +1,13 @@
+﻿
+input {
+    /*    border-start-start-radius: 20px;
+    border-end-start-radius: 20px;*/
+    border-radius: 20px;
+    border-color: lightseagreen;    
+}
+
+button {
+    /*border-end-end-radius: 20px;*/
+    border-end-start-radius: 20px;
+    border-start-end-radius: 20px;
+}

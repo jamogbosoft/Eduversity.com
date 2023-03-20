@@ -1,0 +1,22 @@
+﻿
+.row {
+    display: flex;
+    padding: 6px;
+}
+
+.col {
+    flex: 1;
+}
+
+.my-header {
+    display: flex;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 3px dotted lightgray;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+}
+
+.col-visible {
+    text-align: center;
+}

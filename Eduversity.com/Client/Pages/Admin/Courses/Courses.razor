@@ -1,0 +1,111 @@
+﻿@page "/admin/courses"
+@page "/admin/courses/search/{searchText}/{page:int}"
+@inject ICourseService courseService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Courses</PageTitle>
+
+<SearchCourses />
+<p></p>
+
+<div class="border m-1 p-3 rounded-3">
+
+    <h3 class="my-main-title">Courses</h3><hr />
+
+    @if (loading)
+    {
+        @*<span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <button class="btn btn-primary float-end mb-3" @onclick="CreateNewCourse">
+            <i class="oi oi-plus"></i>
+            Create New Course
+        </button>
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Code</th>
+                    <th>Title</th>
+                    <th class="my-text-align-center">Unit</th>
+                    <th class="my-text-align-center">Status</th>
+                    <th class="my-text-align-center">Active</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <Virtualize Items="courseService.Courses" Context="course">
+                    <tr>
+                        <td></td>
+                        <td>@course.Code</td>
+                        <td>@course.Title</td>
+                        <td class="my-text-align-center">@course.Unit</td>
+                        <td class="my-text-align-center">@course.Status</td>
+                        <td class="my-text-align-center">@(course.IsActive ? "✔️" : "❌")</td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="(() => EditCourse(course.Id))" title="Edit Course">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+
+        for (var i = 1; i <= courseService.PageCount; i++)
+        {
+            <a class="btn
+                 @(i == courseService.CurrentPage ? "btn-primary" : "btn-outline-primary")
+                 page-selection me-2 mb-2"
+       href="/admin/courses/search/@courseService.LastSearchText/@i">@i</a>
+        }
+    }
+</div>
+
+@code {
+
+    bool loading = true;
+    string message = "Loading Courses...";
+
+    [Parameter]
+    public string? SearchText { get; set; }
+
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (SearchText != null)
+            {
+                await courseService.SearchCourses(SearchText, Page);
+            }
+            else
+            {
+                await courseService.GetCourses();
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void EditCourse(int id)
+    {
+        navigationManager.NavigateTo($"/admin/course/{id}");
+    }
+
+    void CreateNewCourse()
+    {
+        navigationManager.NavigateTo("/admin/course");
+    }
+}
