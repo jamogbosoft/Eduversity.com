@@ -1,0 +1,229 @@
+﻿@inject ICourseService courseService
+@inject ICourseStructureService courseStructureService
+@inject ILevelService levelService
+@inject ISemesterService semesterService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+
+<div class="border m-1 p-3 rounded-3 mb-5 mybody">
+
+    <h3 class="my-main-title">Add Courses from the list of General Courses</h3><hr />
+
+    <SearchCourseStructure SearchEvent="ChildSearch" />
+    <p></p>
+    @if (loading)
+    {
+       @* <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <EditForm Model="courseService" >
+            <hr>
+            <div class="form-group row mb-3">
+                <label for="level-select" class="col-sm-2 col-form-label">Level</label>
+                <div class="col-sm-4">
+                    <InputSelect id="level-select" @bind-Value="Level" class="form-select" required>
+                        <option value="0" disabled>Select Level...</option>
+                        @foreach (var level in levelService.Levels)
+                        {
+                            <option value="@level.Value">@level.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Level)" />
+                </div>
+                <label for="semester-select" class="col-sm-2 col-form-label ">Semester</label>
+                <div class="col-sm-4">
+                    <InputSelect id="semester-select" @bind-Value="Semester" class="form-select" required>
+                        <option value="" disabled>Select Semester...</option>
+                        @foreach (var semester in semesterService.Semesters)
+                        {
+                            <option value="@semester.Value">@semester.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Semester)" />
+                </div>
+            </div>
+            <hr>
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Code</th>
+                    <th>Title</th>
+                    <th class="my-text-align-center">Unit</th>
+                    <th class="my-text-align-center">Status</th>
+                    <th class="my-text-align-center">
+                        <InputCheckbox id="select-All" class="form-check-input my-check-box-lg-1"
+                                   ValueExpression="@(() => selectAll)" Value="@selectAll"
+                                   ValueChanged="@((bool value) => OnSelectAllCoursesChanged(value))">
+                        </InputCheckbox>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <Virtualize Items="courseService.Courses" Context="course">
+                    <tr>
+                        <td></td>
+                        <td>@course.Code</td>
+                        <td>@course.Title</td>
+                        <td class="my-text-align-center">@course.Unit</td>
+                        <td class="my-text-align-center">@course.Status</td>
+                        <td class="my-text-align-center">
+                            <InputCheckbox id="isSelected" class="form-check-input my-check-box"
+                                       ValueExpression="@(() => course.IsSelected)" Value="@course.IsSelected"
+                                       ValueChanged="@((bool value) => OnSelectCourseChanged(course, value))">
+                            </InputCheckbox>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+
+        @foreach (var Page in Pages!)
+        {
+            <button type="button" class="btn
+                 @(Page == courseService.CurrentPage ? "btn-primary" : "btn-outline-primary")
+                 page-selection me-2 mb-2"
+            @onclick="(() => GetRecord(Page))">
+                @Page
+            </button>
+        }
+
+        @if (courseService.Courses.Count != 0)
+        {
+            <p></p>
+            <button type="submit" class="btn btn-primary round-border float-end" @onclick="AddSelectedCourses">
+                Add Selected Courses
+            </button>
+            <br /><br />
+        }
+    
+    </EditForm>
+    }
+</div>
+
+@code {
+
+    bool loading = true;
+    string message = "Loading...";
+    string childSearchText { get; set; } = string.Empty;
+    int Page { get; set; } = 1;
+    List<int>? Pages = null!;
+    bool selectAll = false;
+
+    int Level { get; set; } = 100;
+    string Semester { get; set; } = "First"; 
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    [Parameter]
+    public int DepartmentOptionId { get; set; }    
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            await LoadData(Page);
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task LoadData(int page)
+    {
+        if (childSearchText != string.Empty)
+        {
+            await courseService.SearchCourses(childSearchText, page);
+        }
+        else
+        {
+            courseService.Courses = new List<CourseResponse>();
+            courseService.PageCount = 0;
+            courseService.CurrentPage = 1;
+        }
+
+        Pages = new List<int>();
+        for (int i = 1; i <= courseService.PageCount; i++)
+        {
+            Pages.Add(i);
+        }
+        selectAll = false;
+    }
+
+    private async void ChildSearch(string searchText)
+    {
+        childSearchText = searchText;
+        await GetRecord(Page);
+    }
+
+    private async Task GetRecord(int page)
+    {
+        await LoadData(page);
+        //Refresh the page
+        await InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private async Task OnSelectAllCoursesChanged(bool value)
+    {
+        try
+        {
+            selectAll = value;
+            courseService.Courses.ForEach(c => c.IsSelected = selectAll);
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task OnSelectCourseChanged(CourseResponse course, bool value)
+    {
+        try
+        {
+            course.IsSelected = value;
+            selectAll = !value ? value : selectAll;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task AddSelectedCourses()
+    {
+        try
+        {
+            foreach (var course in courseService.Courses)
+            {
+                if (course.IsSelected)
+                {
+                    var courseStructure = new CourseStructureRequest()
+                        {
+                            CourseId = course.Id,
+                            DepartmentOptionId = DepartmentOptionId,
+                            Level = Level,
+                            Semester = Semester
+                        };
+                    var response = await courseStructureService.AddCourse(courseStructure);
+                    course.IsSelected = false;
+                }
+            }
+            selectAll = false;
+            await courseStructureService.GetListOfCourses(DepartmentOptionId);
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

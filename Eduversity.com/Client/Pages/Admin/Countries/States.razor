@@ -1,0 +1,168 @@
+﻿@page "/admin/states/{countryId:int}"
+@inject IStateService stateService
+@inject IToggleService toggleService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>States</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    <h3 class="my-main-title">States in @CountryName</h3><hr />
+
+    @if (loading)
+    {
+      @*  <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+            Countries
+            <i class="oi oi-caret-right"></i>
+        </button>
+
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th width="20px"></th>
+                    <th>State</th>
+                    <th style="text-align:center">Active</th>
+                    <th style="text-align:center">Edit State</th>
+                    <th style="text-align:center">View LGAs</th>
+                </tr>
+            </thead>
+            <tbody class="@toggleService.NavMenuCssClass">
+                <Virtualize Items="stateService.AdminResponse.States" Context="state">
+                    <tr>
+                        <td width="5px">
+                            <div class="row">
+                                <a class="nav-link px-1" @onclick="() => toggleService.TogleSubmenu(state.Id)">
+                                    @if (state.Id == toggleService.NavSubmenuId && state.LGAs.Count != 0)
+                                    {
+                                        <span class="oi oi-minus" aria-hidden="true"></span>
+                                    }
+                                    else if (state.LGAs.Count != 0)
+                                    {
+                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                    }
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <span>@state.Name</span>
+                            <div class="row px-6">
+                                @if (state.Id == toggleService.NavSubmenuId)
+                                {
+                                    @if (state.LGAs.Count != 0)
+                                    {
+                                        <table class="table table-striped table-sm border">
+                                            <thead>
+                                                <tr>
+                                                    <th>LGAs</th>
+                                                    <th style="text-align:center">Active</th>
+                                                    <th style="text-align:center">Edit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var lga in state.LGAs)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <span>@lga.Name</span>
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            <span>@(lga.IsActive ? "✔️" : "❌")</span>
+                                                        </td>
+                                                        <td style="text-align:center">
+                                                            <span>
+                                                                <a class="btn btn-outline-primary btn-sm" title="Edit LGA" @onclick="(() => EditLGA(lga.Id))">
+                                                                    <i class="oi oi-pencil"></i>
+                                                                </a>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td style="text-align:center">@(state.IsActive ? "✔️" : "❌")</td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="(() => EditState(state.Id))" title="Edit State">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                        </td>
+                        <td style="text-align:center">
+                            <button class="btn btn-outline-success btn-sm position-relative" @onclick="(() => ViewLGAs(state.Id))" title="View LGAs">
+                                <i class="oi oi-eye"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background-color: teal;">
+                                    @state.LGAs.Count
+                                </span>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+            Countries
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br />
+
+        <br />
+    }
+</div>
+
+@code {
+    [Parameter] public int CountryId { get; set; }
+    private string CountryName { get; set; } = string.Empty;
+
+    bool loading = true;
+    string message = "Loading States...";
+
+    [CascadingParameter] public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            await stateService.GetAdminStates(CountryId);
+            message = stateService.Message;
+            if (stateService.AdminResponse.States == null || stateService.AdminResponse.CountryId == 0)
+            {
+                return;
+            }
+            CountryName = stateService.AdminResponse.CountryName;
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void EditState(int stateId)
+    {
+        navigationManager.NavigateTo($"admin/state/{stateId}");
+    }
+
+    void EditLGA(int lgaId)
+    {
+        navigationManager.NavigateTo($"admin/lga/{lgaId}");
+    }
+
+    void ViewLGAs(int stateId)
+    {
+        navigationManager.NavigateTo($"admin/lgas/{stateId}");
+    }
+
+    private void BackToCountries()
+    {
+        navigationManager.NavigateTo("admin/countries");
+    }
+}

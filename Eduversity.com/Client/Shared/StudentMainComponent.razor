@@ -1,0 +1,155 @@
+﻿@inject IStudentService studentService
+@inject IFacultyService facultyService
+@inject IDepartmentService departmentService
+@inject IDepartmentOptionService departmentOptionService
+@inject IToastService _toastService
+@attribute [Authorize(Roles = "Admin,Student")]
+
+<div class="border m-0 p-3 rounded-3">
+    @if (loading)
+    {
+      @*<span>@message</span>*@
+       <Loading Message=@message></Loading>
+    }
+    else
+    {
+        @if (student is null)
+        {
+            <span>
+                You haven't captured your personal detail
+                <button class="btn btn-outline-info" @onclick="InitStudent">Add Personal Detail</button>
+            </span>
+        }
+        else if (!editStudent)
+        {
+            <StudentDetailStaticForm student="student"  />        
+
+            <AuthorizeView Roles="Admin">            
+                <Authorized>
+                    <hr />
+                    <button class="btn btn-primary px-5" @onclick="HandleEditStudent">Edit</button>
+                </Authorized>
+            </AuthorizeView>
+        }
+        else
+        {
+            <EditForm Model="student" OnValidSubmit="SubmitStudent" class="was-validated">
+                <DataAnnotationsValidator></DataAnnotationsValidator>                
+                <AuthorizeView Roles="Admin">
+                    <NotAuthorized Context="NotAuthorizedContext">
+                        @if (student.Id == 0)
+                        {
+                            <h3 class="alert alert-info text-center">
+                                PLEASE NOTE THAT YOU CANNOT EDIT THIS FORM ONCE SUBMITTED.<br>ENSURE THAT YOUR DATA IS CORRECT.
+                            </h3>
+                            <StudentPersonalDetailEditForm student="student" />
+                            <StudentAcademicDetailEditForm student="student" />
+                        }
+                    </NotAuthorized>
+                    <Authorized Context="AuthorizedContext">
+                        <StudentPersonalDetailEditForm student="student" />
+                        <StudentAcademicDetailEditForm student="student" />
+                    </Authorized>
+                </AuthorizeView>
+                <button class="btn btn-danger px-3" @onclick="HandleReload">Cancel</button>
+                <button type="submit" class="btn btn-success mx-3 px-3">✔️ Save</button>
+            </EditForm>
+        }
+    }
+</div>
+
+@code {
+    StudentResponse student = null!;
+    bool editStudent = false;
+    bool loading = true;
+    bool canceled = false;
+
+    string message = "Loading Student...";
+
+    [Parameter]
+    public long UserId { get; set; }
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            loading = true;
+            var result = UserId == 0L ?
+                await studentService.GetStudent() :
+                await studentService.GetStudent(UserId);
+            student = result.Data!;
+
+            await facultyService.GetFaculties();
+            if (student != null)
+            {
+                await departmentService.GetDepartments(student.AcademicDetail.FacultyId);
+                await departmentOptionService.GetDepartmentOptions(student.AcademicDetail.DepartmentId);
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task SubmitStudent()
+    {
+        try
+        {
+            if (!canceled)
+            {
+                if (student.AcademicDetail.DepartmentOptionId != 0) //Validate DepartmentOption InputSelect
+                {
+                    editStudent = false;
+                    student = await studentService.AddOrUpdateStudent(student);
+                    _toastService.ShowSuccess("Student's Detail Updated Successfully.");
+                }
+                else { _toastService.ShowWarning("Departmental Option can not be empty"); }
+            }
+            canceled = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void InitStudent()
+    {
+        try
+        {
+            student = new StudentResponse();
+            editStudent = true;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void HandleEditStudent()
+    {
+        editStudent = !editStudent;
+    }
+
+    private async Task HandleReload()
+    {
+        try
+        {
+            canceled = true;
+            var result = UserId == 0L ?
+                await studentService.GetStudent() :
+                await studentService.GetStudent(UserId);
+            student = result.Data!;
+            editStudent = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

@@ -1,0 +1,14 @@
+﻿@page "/department/hod"
+@attribute [Authorize(Roles = "HOD")]
+
+<PageTitle>Department Head</PageTitle>
+
+<AuthorizeView Roles="HOD">
+    <Authorized>       
+        
+        <p>...</p>
+    </Authorized>
+    <NotAuthorized>
+       <UnAuthorizedPrompt />
+    </NotAuthorized>
+</AuthorizeView>

@@ -1,0 +1,44 @@
+﻿
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<AuthorizeView>   
+    <NotAuthorized>            
+        <NavLink class="nav-link" href="signup">
+            Create Account
+        </NavLink>
+        <NavLink class="nav-link" href="signin">
+            Login
+        </NavLink>
+    </NotAuthorized>
+    <Authorized>
+            <h6>Welcome: <i>@(context.User.Identity?.Name!)</i></h6>
+            @*<NavLink class="nav-link" href="change-password">
+                Change Password
+            </NavLink>*@
+            <NavLink class="nav-link" href="#" @onclick="Logout">
+                Logout
+            </NavLink>            
+    </Authorized>
+</AuthorizeView>        
+
+@code {
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    private async Task Logout()
+    {
+        try
+        {
+            await LocalStorage.RemoveItemAsync("authToken");
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            NavigationManager.NavigateTo("/signin");
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

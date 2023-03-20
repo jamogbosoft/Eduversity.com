@@ -1,0 +1,96 @@
+﻿@page "/admin/students"
+@page "/admin/students/{optionId:int}"
+@page "/admin/students/search/{searchText}/{page:int}"
+@page "/admin/student/{userId:long}"
+@inject IStudentService studentService
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>@pageTitle</PageTitle>
+
+@if (loading)
+{
+    <Loading Message=@message></Loading>
+}
+else
+{
+    <SearchStudents From=@me />
+    <p></p>
+
+    @if (UserId is not null)
+    {
+        <StudentMainComponent UserId=(long)UserId />
+        <p></p>
+        <UserAddressComponent UserId=(long)UserId />
+    }
+    else
+    {
+        <StudentsList From=@me />
+    }
+    <p></p>
+}
+
+@code {
+
+    bool loading = true;
+    string pageTitle = string.Empty;
+    string message = "Loading Students...";
+    string me = "admin";
+
+    [Parameter]
+    public int? OptionId { get; set; }
+
+    [Parameter]
+    public string? Session { get; set; } = null;
+
+    [Parameter]
+    public int? Level { get; set; }
+
+    [Parameter]
+    public long? UserId { get; set; }
+
+    [Parameter]
+    public string? SearchText { get; set; } = null;
+
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+    [CascadingParameter]
+    public Error error { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (UserId is not null)
+            {
+                pageTitle = "Student";
+                await studentService.GetStudent((long)UserId);
+            }
+            else
+            {
+                pageTitle = "Students";
+                if (SearchText is not null)
+                {
+                    await studentService.SearchStudents(SearchText, Page);
+                }
+                else if (Session is not null)
+                {
+                    await studentService.GetStudents((int)OptionId!, Session, (int)Level!);
+                }
+                else if (OptionId is not null)
+                {
+                    await studentService.GetStudents((int)OptionId);
+                }
+                else
+                {
+                    await studentService.GetStudents();
+                }
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

@@ -1,0 +1,86 @@
+﻿@page "/admin/lecturers"
+@page "/admin/lecturers/{departmentId:int}"
+@page "/admin/lecturers/search/{searchText}/{page:int}"
+@page "/admin/lecturer/{userId:long}"
+@inject ILecturerService lecturerService
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>@pageTitle</PageTitle>
+
+@if (loading)
+{
+    <Loading Message=@message></Loading>
+}
+else
+{
+    <SearchLecturers From=@me />
+    <p></p>
+
+    @if (UserId is not null)
+    {
+        <LecturerMainComponent UserId=(long)UserId />
+        <p></p>
+        <UserAddressComponent UserId=(long)UserId />
+    }
+    else
+    {
+        <LecturersList From=@me />
+    }
+    <p></p>
+}
+
+@code {
+
+    bool loading = true;
+    string pageTitle = string.Empty;
+    string message = "Loading Lecturers...";
+    string me = "admin";
+
+    [Parameter]
+    public int? DepartmentId { get; set; }
+
+    [Parameter]
+    public long? UserId { get; set; }
+
+    [Parameter]
+    public string? SearchText { get; set; } = null;
+
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+    [CascadingParameter]
+    public Error error { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (UserId is not null)
+            {
+                pageTitle = "Lecturer";
+                await lecturerService.GetLecturer((long)UserId);
+            }
+            else
+            {
+                pageTitle = "Lecturers";
+                if (SearchText is not null)
+                {
+                    await lecturerService.SearchLecturers(SearchText, Page);
+                }
+                else if(DepartmentId is not null)
+                {
+                    await lecturerService.GetLecturers((int)DepartmentId);
+                }                 
+                else
+                {
+                    await lecturerService.GetLecturers();
+                }
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

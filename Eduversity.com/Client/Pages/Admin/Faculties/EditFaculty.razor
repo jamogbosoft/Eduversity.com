@@ -1,0 +1,260 @@
+﻿@page "/admin/faculty"
+@page "/admin/faculty/{id:int}"
+@inject IFacultyService facultyService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Faculty</PageTitle>
+<div class="border m-1 p-3 rounded-3 mb-3">
+    @if (loading)
+    {
+       @* <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+
+        @if (faculty.IsEditing)
+        {
+            <h3 class="my-main-title">Edit Faculty - "@faculty.Name"</h3>
+        }
+        else if (faculty.IsNew)
+        {
+            <h3 class="my-main-title">Create a new Faculty</h3>
+        }
+        <hr />
+        <button type="button" class="btn btn-outline-primary float-end" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br />
+
+        <br />
+
+        <br />
+
+        <EditForm Model="faculty" OnValidSubmit="AddOrUpdateFaculty" class="was-validated">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+
+            <div class="my-header row">
+                <div class="col-10"></div>
+                <div class="col-5">Faculty</div>
+                <div class="col-3">Abbrv</div>
+                <div class="col-1 text-align:center">Active</div>
+                <div class="col-1"></div>
+
+            </div>
+            <div class="row">
+                <div class="col-10"></div>
+                <div class="col-5">
+                    <InputText id="facultyName"  @bind-Value="faculty.Name" class="form-control" 
+                        placeholder="Enter Faculty Name" maxlength="50" required>
+                    </InputText>
+                    <ValidationMessage For="@(() => faculty.Name)" />
+                    <div class="invalid-feedback">Please enter the faculty name</div>
+                </div>
+                <div class="col-3">
+                    <InputText id="facultyAbbreviation" @bind-Value="faculty.Abbreviation" class="form-control" 
+                        placeholder="Abbreviation" maxlength="3" required>
+                    </InputText>
+                    <ValidationMessage For="@(() => faculty.Abbreviation)" />
+                    <div class="invalid-feedback">Please enter the abbreviation</div>
+                </div>
+                <div class="col-1 col-visible">
+                    <InputCheckbox @bind-Value="faculty.IsActive" class="form-check-input my-check-box"></InputCheckbox>
+                </div>
+                <div class="col-1">
+                </div>
+            </div>
+            <hr>
+
+            @if (!faculty.IsNew)
+            {
+                <div class="my-header row">
+                    <div class="col-10"></div>
+                    <div class="col-5">Departments</div>
+                    <div class="col-3">Abbrv</div>
+                    <div class="col-1 text-align:center">Active</div>
+                    <div class="col-1"></div>
+                </div>
+
+                @foreach (var department in faculty.Departments)
+                {
+                    <div class="row">
+                        <div class="col-10"></div>
+                        <div class="col-5">
+                            <InputText id="departmentName" @bind-Value="department.Name" class="form-control"
+                                disabled="@department.IsDeleted"  placeholder="Enter Department" maxlength="50" required>
+                            </InputText>
+                            <ValidationMessage For="@(() => department.Name)" />
+                            <div class="invalid-feedback">Please enter the department name</div>
+                        </div>
+                        <div class="col-3">
+                            <InputText id="departmentAbbreviation" @bind-Value="department.Abbreviation" class="form-control"
+                                disabled="@department.IsDeleted"  placeholder="Abbreviation" maxlength="3" required>
+                            </InputText>
+                            <ValidationMessage For="@(() => department.Abbreviation)" />
+                            <div class="invalid-feedback">Please enter the abbreviation</div>
+                        </div>
+                        <div class="col-1 col-visible">
+                            <InputCheckbox @bind-Value="department.IsActive" class="form-check-input my-check-box"
+                                disabled="@department.IsDeleted">
+                            </InputCheckbox>
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-danger" disabled="@department.IsDeleted"
+                                @onclick="@(() => RemoveDepartment(department))" title="Delete Department">
+                                <i class="oi oi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+                <button type="button" class="btn btn-primary mt-3" @onclick="AddDepartment">
+                    <i class="oi oi-plus"></i> Add Department
+                </button>
+                <hr />
+            }
+            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+
+        </EditForm>
+        @if (!faculty.IsNew)
+        {
+            <button type="button" class="btn btn-danger float-start" @onclick="DeleteFaculty">
+                Delete Faculty
+            </button>
+        }
+        <br /><br />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    Faculty faculty = new Faculty();
+    bool loading = true;
+    string btnSubmitButtonText = "";
+    string message = "Loading...";
+
+    [CascadingParameter] public Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (Id == 0)
+            {
+                faculty = new Faculty { IsNew = true };
+                btnSubmitButtonText = "Create Faculty";
+            }
+            else
+            {
+                var result = await facultyService.GetAdminFaculty(Id);
+                var dbFaculty = result.Data;
+                if (dbFaculty == null)
+                {
+                    message = $"Faculty with Id '{Id}' does not exist!";
+                    return;
+                }
+                faculty = dbFaculty;
+                faculty.IsEditing = true;
+                btnSubmitButtonText = "Update Faculty";
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+             error.ProcessError(ex);
+        }
+    }
+
+    void RemoveDepartment(Department department)
+    {
+        try
+        {
+            if (department.IsNew)
+            {
+                faculty.Departments.Remove(department);
+            }
+            else
+            {
+                var oldDepartment = faculty.Departments.Find(d => d.Id == department.Id);
+
+                if (oldDepartment == null)
+                {
+                    return;
+                }
+                oldDepartment.IsDeleted = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    void AddDepartment()
+    {
+        try
+        {
+            faculty.Departments.Add(new Department() { IsNew = true, FacultyId = faculty.Id });
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void AddOrUpdateFaculty()
+    {
+        try
+        {
+            if (faculty.IsNew)
+            {
+                var result = await facultyService.CreateFaculty(faculty);
+                navigationManager.NavigateTo($"admin/faculty/{result.Id}");
+
+                toastService.ShowSuccess($"New Faculty '{result.Name}' was created successfully.");
+            }
+            else
+            {
+                faculty.IsNew = false;
+                faculty = await facultyService.UpdateFaculty(faculty);
+                navigationManager.NavigateTo($"admin/faculty/{faculty.Id}");
+
+                toastService.ShowSuccess($"{faculty.Name} was updated successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    async void DeleteFaculty()
+    {
+        try
+        {
+            bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
+                $"Do you really want to delete '{faculty.Name}' and all the departments and options in '{faculty.Name}'?");
+            if (confirmed)
+            {
+                await facultyService.DeleteFaculty(faculty);
+                navigationManager.NavigateTo("admin/faculties");
+
+                toastService.ShowInfo(faculty.Name + " was deleted successfully.");
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void BackToFaculties()
+    {
+        navigationManager.NavigateTo("admin/faculties");
+    }
+}

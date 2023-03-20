@@ -1,0 +1,109 @@
+﻿@inject ILecturerService lecturerService
+@inject IGenderService genderService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+@implements IDisposable
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    <h3 class="my-main-title">Lecturers</h3><hr />
+
+@if (loading)
+{
+    <span>@message</span>
+}
+else
+{
+    @if (lecturerService.Lecturers == null || lecturerService.Lecturers.Count == 0)
+    {
+            <span>No Record Found</span>
+    }
+    else
+    {
+            <table class="table table-sm table-striped border">
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Lecturer</th>
+                    <th>Gender</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <Virtualize Items="lecturerService.Lecturers" Context="lecturer">
+                    <tr>
+                        <td>
+                            <span>@lecturer.AcademicDetail.DepartmentName</span>
+                        </td>
+                        <td>
+                            <span>@lecturer.Name</span>
+                        </td>
+                        <td>
+                            <span>@GetGender(lecturer)</span>
+                        </td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-primary btn-sm position-relative" @onclick="(() => ViewProfile(lecturer.UserId))" title="View Profile">
+                                <i class="oi oi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+
+        for (var i = 1; i <= lecturerService.PageCount; i++)
+        {
+            <a class="btn
+                 @(i == lecturerService.CurrentPage ? "btn-primary" : "btn-outline-primary")
+                 page-selection me-2"
+       href="/@From/lecturers/search/@lecturerService.LastSearchText/@i">@i</a>
+        }
+    }}
+
+</div>
+
+@code {
+
+    bool loading = true;
+    string message = "Loading Lecturers...";
+
+    [Parameter]
+    public string From { get; set; } = string.Empty; //= "admin" or "department"
+
+    [CascadingParameter]
+    public Error error { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        lecturerService.LecturersChanged += StateHasChanged;
+        loading = false;
+    }
+
+    public void Dispose()
+    {
+        lecturerService.LecturersChanged -= StateHasChanged;
+    }
+
+    void ViewProfile(long userId)
+    {
+        navigationManager.NavigateTo($"{From}/lecturer/{userId}");
+    }
+
+    private string GetGender(LecturerResponse lecturer)
+    {
+        try
+        {
+            var gender = genderService.Genders.FirstOrDefault(s => s.Value == lecturer.Gender);
+            if (gender == null)
+            {
+                return lecturer.Gender;
+            }
+            return gender.Name;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+            return string.Empty;
+        }
+    }
+}

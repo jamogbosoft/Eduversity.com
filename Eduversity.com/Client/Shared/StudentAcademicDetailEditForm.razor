@@ -1,0 +1,196 @@
+﻿@inject IFacultyService facultyService
+@inject IDepartmentService departmentService
+@inject IDepartmentOptionService departmentOptionService
+@inject ISessionService sessionService
+@inject ILevelService levelService
+@inject ISemesterService semesterService
+@implements IDisposable
+@attribute [Authorize(Roles = "Admin,Student")]
+
+@if (loading)
+{
+    <span>@message</span>
+}
+else
+{
+    <h3 class="my-main-title">Academic Detail</h3>
+
+    <div class="row">
+        <div class="col-sm mb-3">
+            <label for="regNumber">Reg. Number</label>
+            <InputText id="regNumber" @bind-Value="student.AcademicDetail.RegNumber"
+                   class="form-control" required maxlength="20" />
+            <ValidationMessage For="@(() => student.AcademicDetail.RegNumber)" />
+        </div>
+        <div class="col-sm mb-3">
+            <label for="currentSession">Current Session</label>
+            <InputSelect id="currentSession" @bind-Value="student.AcademicDetail.Session"
+                     class="form-select" required maxlength="9">
+                <option value="">Select Session...</option>
+                @foreach (var session in sessionService.Sessions)
+                {
+                    <option value="@session.Value">@session.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => student.AcademicDetail.Session)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm mb-3">
+            <label for="currentLevel">Current Level</label>
+            <InputSelect id="currentLevel" @bind-Value="student.AcademicDetail.Level"
+                     class="form-select" required>
+                <option value="">Select Level...</option>
+                @foreach (var level in levelService.Levels)
+                {
+                    <option value="@level.Value">@level.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => student.AcademicDetail.Level)" />
+        </div>
+        <div class="col-sm mb-3">
+            <label for="currentSemester">Current Semester</label>
+            <InputSelect id="currentSemester" @bind-Value="student.AcademicDetail.Semester"
+                     class="form-select" required maxlength="6">
+                <option value="">Select Semester...</option>
+                @foreach (var semester in semesterService.Semesters)
+                {
+                    <option value="@semester.Value">@semester.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => student.AcademicDetail.Semester)" />
+        </div>
+    </div>
+    @if (facultyService.Faculties != null && facultyService.Faculties.Count > 0)
+    {
+        <div class="row">
+            <div class="col-sm mb-3">
+                <label for="inputFaculty">Faculty</label>
+                <InputSelect class="form-select" id="inputFaculty"
+                     ValueExpression="@(()=>student.AcademicDetail.FacultyId)" Value="@student.AcademicDetail.FacultyId"
+                     ValueChanged="@((int value) => OnFacultyValueChanged(value))">
+                    <option value="0">Select Faculty...</option>
+                    @foreach (var faculty in facultyService.Faculties)
+                    {
+                        <option value="@faculty.Id">@faculty.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm mb-3">
+                <label for="inputDepartment">Department</label>
+                <InputSelect class="form-select" id="inputDepartment"
+                     ValueExpression="@(()=>student.AcademicDetail.DepartmentId)" Value="@student.AcademicDetail.DepartmentId"
+                     ValueChanged="@((int value) => OnDepartmentValueChanged(value))">
+                    <option value="0">Select Department...</option>
+                    @foreach (var department in departmentService.Departments)
+                    {
+                        <option value="@department.Id">@department.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm mb-3">
+                <label for="inputDepartmentOption">Option</label>
+                <InputSelect class="form-select" id="inputDepartmentOption"
+                     ValueExpression="@(()=>student.AcademicDetail.DepartmentOptionId)" Value="@student.AcademicDetail.DepartmentOptionId"
+                     ValueChanged="@((int value) => OnDepartmentOptionValueChanged(value))">
+                    <option value="0">Select Option...</option>
+                    @foreach (var option in departmentOptionService.DepartmentOptions)
+                    {
+                        <option value="@option.Id">@option.Name</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col mb-3">
+            <InputCheckbox id="graduated" @bind-Value="student.AcademicDetail.Graduated" class="form-check-input my-check-box"></InputCheckbox>
+            <label for="graduated">Graduated</label>
+        </div>
+        <div class="col mb-3">
+            <InputCheckbox id="passedOut" @bind-Value="student.AcademicDetail.PassedOut" class="form-check-input my-check-box"></InputCheckbox>
+            <label for="passedOut">Passed Out</label>
+        </div>
+    </div>
+    <hr>
+}
+
+@code {
+    bool loading = true;
+    string message = "Loading Academic Detail...";
+
+    [Parameter]
+    public StudentResponse student { get; set; } = new();
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            facultyService.FacultiesChanged += StateHasChanged;
+            departmentService.DepartmentsChanged += StateHasChanged;
+            departmentOptionService.DepartmentOptionsChanged += StateHasChanged;
+
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    public void Dispose()
+    {
+        facultyService.FacultiesChanged -= StateHasChanged;
+        departmentService.DepartmentsChanged -= StateHasChanged;
+        departmentOptionService.DepartmentOptionsChanged -= StateHasChanged;
+    }
+
+    private async Task OnFacultyValueChanged(int value)
+    {
+        try
+        {
+            student.AcademicDetail.DepartmentOptionId = 0;
+            student.AcademicDetail.DepartmentId = 0;
+            student.AcademicDetail.FacultyId = value;
+            await departmentService.GetDepartments(value);
+            departmentOptionService.DepartmentOptions = new List<DepartmentOptionReadDto>();
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task OnDepartmentValueChanged(int value)
+    {
+        try
+        {
+            student.AcademicDetail.DepartmentOptionId = 0;
+            student.AcademicDetail.DepartmentId = value;
+            await departmentOptionService.GetDepartmentOptions(value);
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private async Task OnDepartmentOptionValueChanged(int value)
+    {
+        try
+        {
+            student.AcademicDetail.DepartmentOptionId = value;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

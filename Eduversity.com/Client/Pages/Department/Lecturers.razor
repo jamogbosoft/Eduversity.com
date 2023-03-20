@@ -1,0 +1,92 @@
+﻿@page "/department/lecturers"
+@page "/department/lecturers/search/{searchText}/{page:int}"
+@page "/department/lecturer/{userId:long}"
+@inject ILecturerService lecturerService
+@attribute [Authorize(Roles = "HOD")]
+
+<PageTitle>@pageTitle</PageTitle>
+
+@if (loading)
+{
+    <Loading Message=@message></Loading>
+}
+else
+{
+    <SearchLecturers DepartmentId=@HOD_DepartmentId From=@me />
+    <p></p>
+
+    @if (UserId is not null)
+    {
+        <LecturerDetailStaticForm lecturer="lecturer" />
+        <p></p>
+        <UserAddressComponent UserId=(long)UserId />
+    }
+    else
+    {
+        <LecturersList From=@me />
+    }
+    <p></p>
+}
+
+@code {
+
+    bool loading = true;
+    string pageTitle = string.Empty;
+    string message = "Loading Lecturers...";
+    string me = "department";
+
+    int HOD_DepartmentId { get; set; } = 1; //  MODIFY LATER
+    int HOD_OptionId { get; set; } = 2; //  MODIFY LATER
+
+    [Parameter]
+    public int? DepartmentId { get; set; }
+
+    [Parameter]
+    public long? UserId { get; set; }
+
+    [Parameter]
+    public string? SearchText { get; set; } = null;
+
+    [Parameter]
+    public int Page { get; set; } = 1;
+
+    [CascadingParameter]
+    public Error error { get; set; } = new();
+
+    LecturerResponse lecturer = null!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            if (UserId is not null)
+            {
+                pageTitle = "Lecturer";
+                var result = await lecturerService.GetLecturer((long)UserId);
+                lecturer = result.Data!;
+            }
+            else
+            {
+                pageTitle = "Lecturers";
+                if (SearchText is not null)
+                {
+                    await lecturerService.SearchLecturers(SearchText, Page, HOD_DepartmentId);
+                }
+                else if (HOD_DepartmentId != 0)
+                {
+                    await lecturerService.GetLecturers(HOD_DepartmentId);
+                }
+                else
+                {
+                    message = "This HOD is not linked to any department";
+                }               
+
+            }
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

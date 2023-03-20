@@ -1,0 +1,19 @@
+﻿@page "/lecturer/profile"
+@using Eduversity.com.Client.Pages.LoginPages
+@attribute [Authorize(Roles = "Lecturer")]
+
+<PageTitle>Lecturer Profile</PageTitle>
+
+<AuthorizeView Roles="Lecturer">
+    <Authorized>       
+        <LecturerMainComponent />
+        <p></p>
+        <UserAddressComponent /> 
+        <p></p>
+        <ChangePassword ChangeUserPassword=false />
+        <p></p>
+    </Authorized>
+    <NotAuthorized>
+       <UnAuthorizedPrompt />
+    </NotAuthorized>
+</AuthorizeView>

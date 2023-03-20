@@ -1,0 +1,115 @@
+﻿@page "/admin/department/options/{departmentId:int}"
+@inject IDepartmentOptionService departmentOptionService
+@inject IToggleService toggleService
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Department Options</PageTitle>
+
+<div class="border m-1 p-3 rounded-3 mb-3">
+    <h3 class="my-main-title">Options in @DepartmentName, Faculty of @FacultyName.</h3><hr />
+
+    @if (loading)
+    {
+      @*  <span>@message</span>*@
+        <Loading Message=@message></Loading>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-3" @onclick="@(() => BackToDepartments(FacultyId))">
+            Depts...
+            <i class="oi oi-caret-right"></i>
+        </button>
+
+        <table class="table table-striped table-sm border">
+            <thead>
+                <tr>
+                    <th>Option</th>
+                    <th style="text-align:center">Active</th>
+                    <th style="text-align:center">Edit Option</th>
+                </tr>
+            </thead>
+            <tbody class="@toggleService.NavMenuCssClass">
+                <Virtualize Items="departmentOptionService.AdminResponse.Options" Context="option">
+                    <tr>
+                        <td>@option.Name - (@option.Abbreviation)</td>
+                        <td style="text-align:center">@(option.IsActive ? "✔️" : "❌")</td>
+                        <td class="my-text-align-center">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="(() => EditOption(option.Id))" title="Edit LGA">
+                                <i class="oi oi-pencil"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+            Faculties
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-3" @onclick="@(() => BackToDepartments(FacultyId))">
+            Depts...
+            <i class="oi oi-caret-right"></i>
+        </button>
+        <br />
+
+        <br />
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public int DepartmentId { get; set; }
+
+    private int FacultyId { get; set; }
+    private string DepartmentName { get; set; } = string.Empty;
+    private string FacultyName { get; set; } = string.Empty;
+
+    bool loading = true;
+    string message = "Loading...";
+
+    [CascadingParameter]
+    Error error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            await departmentOptionService.GetAdminDepartmentOptions(DepartmentId);
+            message = departmentOptionService.Message;
+            if (departmentOptionService.AdminResponse.Options == null || departmentOptionService.AdminResponse.DepartmentId == 0)
+            {
+                return;
+            }
+            DepartmentName = departmentOptionService.AdminResponse.DepartmentName;
+            FacultyId = departmentOptionService.AdminResponse.FacultyId;
+            FacultyName = departmentOptionService.AdminResponse.FacultyName;
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void EditOption(int optionId)
+    {
+        navigationManager.NavigateTo($"admin/department/option/{optionId}");
+    }
+
+    private void BackToFaculties()
+    {
+        navigationManager.NavigateTo("admin/faculties");
+    }
+
+    private void BackToDepartments(int facultyId)
+    {
+        navigationManager.NavigateTo($"admin/departments/{facultyId}");
+    }
+}
