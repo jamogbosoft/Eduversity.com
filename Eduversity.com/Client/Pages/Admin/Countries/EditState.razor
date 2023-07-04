@@ -17,11 +17,11 @@
     {
         <h3 class="my-main-title">Edit State - "@state.Name" in @CountryName</h3><hr />
 
-        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3" @onclick="@(() => BackToCountries())">
             Countries
             <i class="oi oi-caret-right"></i>
         </button>
-        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-5" @onclick="@(() => BackToStates())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3 mx-3" @onclick="@(() => BackToStates())">
             States
             <i class="oi oi-caret-right"></i>
         </button>
@@ -41,7 +41,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <InputText id="stateName" @bind-Value="state.Name" class="form-control" placeholder="Enter State" maxlength="30" required></InputText>
+                    <InputText id="stateName" @bind-Value="state.Name" class="form-control form-control-sm" placeholder="Enter State" maxlength="30" required></InputText>
                     <ValidationMessage For="@(() => state.Name)" />
                     <div class="invalid-feedback">Please enter the state name</div>
                 </div>
@@ -65,7 +65,7 @@
                 {
                     <div class="row">
                         <div class="col">
-                            <InputText id="lgaName" @bind-Value="lga.Name" class="form-control"
+                            <InputText id="lgaName" @bind-Value="lga.Name" class="form-control form-control-sm"
                                 disabled="@lga.IsDeleted" placeholder="Enter LGA" required>
                             </InputText>
                             <ValidationMessage For="@(() => lga.Name)" />
@@ -77,23 +77,23 @@
                             </InputCheckbox>
                         </div>
                         <div class="col">
-                            <button type="button" class="btn btn-danger" disabled="@lga.IsDeleted"
+                            <button type="button" class="btn btn-danger btn-sm" disabled="@lga.IsDeleted"
                                 @onclick="@(() => RemoveLGA(lga))" title="Delete LGA">
                                 <i class="oi oi-trash"></i>
                             </button>
                         </div>
                     </div>
                 }
-                <button type="button" class="btn btn-primary mt-3" @onclick="AddLGA">
+                <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddLGA">
                     <i class="oi oi-plus"></i> Add LGA
                 </button>
                 <hr />
             }
-            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
         </EditForm>
         @if (!state.IsNew)
         {
-            <button type="button" class="btn btn-danger float-end" @onclick="DeleteState">
+            <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteState">
                 Delete State
             </button>
         }

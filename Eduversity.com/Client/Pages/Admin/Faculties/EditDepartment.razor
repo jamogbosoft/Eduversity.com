@@ -16,12 +16,12 @@
     else
     {
         <h3 class="my-main-title">Edit Department - "@department.Name" -- Faculty of @FacultyName</h3><hr />
-        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToFaculties())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3" @onclick="@(() => BackToFaculties())">
             Faculties
             <i class="oi oi-caret-right"></i>
         </button>
-        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-5" @onclick="@(() => BackToDepartments())">
-            Dept...
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3 mx-3" @onclick="@(() => BackToDepartments())">
+            Depts...
             <i class="oi oi-caret-right"></i>
         </button>
         <br />
@@ -41,14 +41,14 @@
             <div class="row">
                 <div class="col-10"></div>
                 <div class="col-5">
-                    <InputText id="departmentName" @bind-Value="department.Name" class="form-control" 
-                        placeholder="Enter Department" maxlength="50" required>
+                    <InputText id="departmentName" @bind-Value="department.Name" class="form-control form-control-sm"
+                           placeholder="Enter Department" maxlength="50" required>
                     </InputText>
                     <ValidationMessage For="@(() => department.Name)" />
                     <div class="invalid-feedback">Please enter the department name</div>
                 </div>
                 <div class="col-3">
-                    <InputText id="departmentAbbreviation" @bind-Value="department.Abbreviation" class="form-control"
+                    <InputText id="departmentAbbreviation" @bind-Value="department.Abbreviation" class="form-control form-control-sm"
                         placeholder="Abbreviation" maxlength="3"  required>
                     </InputText>
                     <ValidationMessage For="@(() => department.Abbreviation)" />
@@ -77,15 +77,15 @@
                     <div class="row">
                         <div class="col-10"></div>
                         <div class="col-5">
-                            <InputText id="optionName" @bind-Value="option.Name" class="form-control"
+                            <InputText id="optionName" @bind-Value="option.Name" class="form-control form-control-sm"
                                 disabled="@option.IsDeleted"  placeholder="Enter Option Name" maxlength="50" required>
                             </InputText>
                             <ValidationMessage For="@(() => option.Name)" />
                             <div class="invalid-feedback">Please enter the option name</div>
                         </div>
                         <div class="col-3">
-                            <InputText id="optionAbbreviation" @bind-Value="option.Abbreviation" class="form-control" 
-                                disabled="@option.IsDeleted" placeholder="Abbreviation" maxlength="3" required>
+                            <InputText id="optionAbbreviation" @bind-Value="option.Abbreviation" class="form-control form-control-sm"
+                           disabled="@option.IsDeleted" placeholder="Abbreviation" maxlength="3" required>
                             </InputText>
                             <ValidationMessage For="@(() => option.Abbreviation)" />
                             <div class="invalid-feedback">Please enter the abbreviation</div>
@@ -96,24 +96,24 @@
                             </InputCheckbox>
                         </div>
                         <div class="col-1">
-                            <button type="button" class="btn btn-danger" disabled="@option.IsDeleted"
+                            <button type="button" class="btn btn-danger btn-sm" disabled="@option.IsDeleted"
                                 @onclick="@(() => RemoveOption(option))" title="Delete Option">
                                 <i class="oi oi-trash"></i>
                             </button>
                         </div>
                     </div>
                 }
-                <button type="button" class="btn btn-primary mt-3" @onclick="AddOption">
+                <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddOption">
                     <i class="oi oi-plus"></i> Add Option
                 </button>
                 <hr />
             }
-            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
         </EditForm>
         @if (!department.IsNew)
         {
-            <button type="button" class="btn btn-danger float-end" @onclick="DeleteDepartment">
-                Delete Dept
+            <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteDepartment">
+                Delete Dept.
             </button>
         }
         <br /><br />
@@ -154,7 +154,7 @@
             FacultyId = dbDepartmentResponse.FacultyId;
             department = dbDepartmentResponse.Department;
             department.IsEditing = true;
-            btnSubmitButtonText = "Update Dept";
+            btnSubmitButtonText = "Update Dept.";
             loading = false;
         }
         catch (Exception ex)

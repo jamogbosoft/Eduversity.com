@@ -34,6 +34,7 @@
             <span class="col-12"></span>
             <button type="submit" class="btn btn-primary btncol mb-3">Login</button>
             <span class="spancol"></span>
+
             <button @onclick="HandleSignUp" class="btn btn-outline-success btncol mb-3">Create Account</button>
         </div>
         <div class="col-12">
@@ -51,12 +52,12 @@
     [Parameter]
     public string Role { get; set; } = string.Empty;
 
-    private UserLoginRequest user = new UserLoginRequest();
+    UserLoginRequest user = new UserLoginRequest();
 
-    private string message = string.Empty;
+    string message = string.Empty;
     string messageCssClass = string.Empty;
 
-    private string returnUrl = string.Empty;
+    string returnUrl = string.Empty;
 
     //protected override void OnInitialized()
     protected async override Task OnInitializedAsync()

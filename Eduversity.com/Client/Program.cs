@@ -43,7 +43,6 @@ global using Microsoft.AspNetCore.Components.Web;
 global using System.Net.Http.Json;
 using Eduversity.com.Client.Providers;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Syncfusion.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -82,16 +81,11 @@ builder.Services.AddScoped<ISemesterService, SemesterService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ICourseStructureService, CourseStructureService>();
 
-
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
-
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
 builder.Services.AddBlazoredToast();
-builder.Services.AddSyncfusionBlazor();
-// Register Syncfusion license
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MTQyNzA2N0AzMjMwMmUzNDJlMzBRbmVQMGhET1pzUVUzcEtiZXNFMk8ySU1FU0kzYk1XMEJOdHQxNmNJdTV3PQ==");
 
 await builder.Build().RunAsync();

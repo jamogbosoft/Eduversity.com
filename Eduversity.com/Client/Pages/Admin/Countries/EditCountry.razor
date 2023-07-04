@@ -26,7 +26,7 @@
             <h3 class="my-main-title">Create a new Country</h3>
         }
         <hr />
-        <button type="button" class="btn btn-outline-primary float-end" @onclick="@(() => BackToCountries())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end" @onclick="@(() => BackToCountries())">
             Countries
             <i class="oi oi-caret-right"></i>
         </button>
@@ -46,7 +46,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <InputText id="countryName" @bind-Value="country.Name" class="form-control" placeholder="Enter Country" maxlength="30" required></InputText>
+                    <InputText id="countryName" @bind-Value="country.Name" class="form-control form-control-sm" placeholder="Enter Country" maxlength="30" required></InputText>
                     <ValidationMessage For="@(() => country.Name)" />
                     <div class="invalid-feedback">Please enter the country name</div>
                 </div>
@@ -70,7 +70,7 @@
                 {
                     <div class="row">
                         <div class="col">
-                            <InputText id="stateName" @bind-Value="state.Name" class="form-control"
+                            <InputText id="stateName" @bind-Value="state.Name" class="form-control form-control-sm"
                                 disabled="@state.IsDeleted" placeholder="Enter State" maxlength="30" required>
                             </InputText>
                             <ValidationMessage For="@(() => state.Name)" />
@@ -82,24 +82,24 @@
                             </InputCheckbox>
                         </div>
                         <div class="col">
-                            <button type="button" class="btn btn-danger" disabled="@state.IsDeleted" 
+                            <button type="button" class="btn btn-danger btn-sm" disabled="@state.IsDeleted" 
                                 @onclick="@(() => RemoveState(state))" title="Delete State">
                                 <i class="oi oi-trash"></i>
                             </button>
                         </div>
                     </div>
                 }
-                <button type="button" class="btn btn-primary mt-3" @onclick="AddState">
+                <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddState">
                     <i class="oi oi-plus"></i> Add State
                 </button>
                 <hr />
             }
-            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
 
         </EditForm>
         @if (!country.IsNew)
         {
-            <button type="button" class="btn btn-danger float-end" @onclick="DeleteCountry">
+            <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteCountry">
                 Delete Country
             </button>
         }

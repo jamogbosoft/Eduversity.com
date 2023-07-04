@@ -17,15 +17,15 @@
     {
         <h3 class="my-main-title">Edit LGA - "@lga.Name" in @StateName, @CountryName</h3><hr />
 
-        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToCountries())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3" @onclick="@(() => BackToCountries())">
             Countries
             <i class="oi oi-caret-right"></i>
         </button>
-        <button type="button" class="btn btn-outline-primary float-end mb-3 mx-1" @onclick="@(() => BackToStates())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3 mx-1" @onclick="@(() => BackToStates())">
             States
             <i class="oi oi-caret-right"></i>
         </button>
-        <button type="button" class="btn btn-outline-primary float-end mb-3" @onclick="@(() => BackToLGAs())">
+        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3" @onclick="@(() => BackToLGAs())">
             LGAs
             <i class="oi oi-caret-right"></i>
         </button>
@@ -44,7 +44,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <InputText id="lgaName" @bind-Value="lga.Name" class="form-control" 
+                    <InputText id="lgaName" @bind-Value="lga.Name" class="form-control form-control-sm" 
                         placeholder="Enter LGA" maxlength="30" required>
                     </InputText>
                     <ValidationMessage For="@(() => lga.Name)" />
@@ -56,11 +56,11 @@
             </div>
             <hr>
 
-            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
         </EditForm>
         @if (!lga.IsNew)
         {
-            <button type="button" class="btn btn-danger float-end" @onclick="DeleteLGA">
+            <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteLGA">
                 Delete LGA
             </button>
         }
