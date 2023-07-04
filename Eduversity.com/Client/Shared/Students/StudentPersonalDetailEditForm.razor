@@ -25,19 +25,19 @@ else
     <div class="row">
         <div class="col-sm mb-3">
             <label for="firstName">First Name</label>
-            <InputText id="firstName" @bind-Value="student.FirstName" class="form-control" required maxlength="15" />
+            <InputText id="firstName" @bind-Value="student.FirstName" class="form-control" required maxlength="20" />
             <ValidationMessage For="@(() => student.FirstName)" />
         </div>
         <div class="col-sm mb-3">
             <label for="middleName">Middle Name</label>
-            <InputText id="middleName" @bind-Value="student.MiddleName" class="form-control" maxlength="15" />
+            <InputText id="middleName" @bind-Value="student.MiddleName" class="form-control" maxlength="20" />
             <ValidationMessage For="@(() => student.MiddleName)" />
         </div>
     </div>
     <div class="row">
         <div class="col-sm mb-3">
             <label for="lastName">Last Name</label>
-            <InputText id="lastName" @bind-Value="student.LastName" class="form-control" required maxlength="15" />
+            <InputText id="lastName" @bind-Value="student.LastName" class="form-control" required maxlength="25" />
             <ValidationMessage For="@(() => student.LastName)" />
         </div>
         <div class="col-sm mb-3">

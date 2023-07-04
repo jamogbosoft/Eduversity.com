@@ -1,0 +1,10 @@
+﻿@page "/lecturer/signup"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Sign Up</PageTitle>
+
+<SignUpComponent Role="Lecturer" MainTitle="Create New Lecturer Account" />
+
+@code {
+    
+}

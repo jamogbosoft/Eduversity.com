@@ -89,11 +89,11 @@
                 </button>
                 <hr />
             }
-            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
         </EditForm>
         @if (!state.IsNew)
         {
-            <button type="button" class="btn btn-danger float-start" @onclick="DeleteState">
+            <button type="button" class="btn btn-danger float-end" @onclick="DeleteState">
                 Delete State
             </button>
         }

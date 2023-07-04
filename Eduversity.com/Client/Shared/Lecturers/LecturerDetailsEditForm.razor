@@ -28,7 +28,7 @@ else
     <div class="row">
         <div class="col-sm mb-3">
             <label for="lecturersName">Name</label>
-            <InputText id="lecturersName" @bind-Value="lecturer.Name" class="form-control" required maxlength="45" />
+            <InputText id="lecturersName" @bind-Value="lecturer.Name" class="form-control" required maxlength="50" />
             <ValidationMessage For="@(() => lecturer.Name)" />
         </div>
         <div class="col-sm mb-3">

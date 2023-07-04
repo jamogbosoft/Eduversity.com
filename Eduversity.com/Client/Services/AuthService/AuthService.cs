@@ -11,7 +11,7 @@
             _authStateProvider = authStateProvider;
         }
 
-        public async Task<ServiceResponse<bool>> ChangePassword(UserChangePassword request)
+        public async Task<ServiceResponse<bool>> ChangePassword(UserChangePasswordRequest request)
         {
             var result = await _http.PostAsJsonAsync("api/auth/change-password", request);
             var response = await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
@@ -27,14 +27,14 @@
 
         }
 
-        public async Task<ServiceResponse<string>> Login(UserLogin request)
+        public async Task<ServiceResponse<string>> Login(UserLoginRequest request)
         {
             var result = await _http.PostAsJsonAsync("api/auth/login", request);
             var response = await result.Content.ReadFromJsonAsync<ServiceResponse<string>>();
             return response!;
         }
 
-        public async Task<ServiceResponse<long>> Register(UserRegister request)
+        public async Task<ServiceResponse<long>> Register(UserRegisterRequest request)
         {
             var result = await _http.PostAsJsonAsync("api/auth/register", request);
             var response = await result.Content.ReadFromJsonAsync<ServiceResponse<long>>();

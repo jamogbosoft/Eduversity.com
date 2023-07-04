@@ -1,11 +1,8 @@
-﻿@page "/signup"
-@inject AuthenticationStateProvider authenticationStateProvider
+﻿@inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorageService
 @inject IAuthService authService
 @inject IToastService toastService
-
-<PageTitle>Sign Up</PageTitle>
 
 <div class="border m-0 p-3 rounded-3">
     <EditForm Model="user" OnValidSubmit="HandleRegistration">
@@ -14,7 +11,7 @@
             <br />
         </div>
         <div>
-            <h3 class="my-main-title">Create An Account</h3>
+            <h3 class="my-main-title">@MainTitle</h3>
         </div>
         <div>
             <br />
@@ -37,7 +34,7 @@
         <div class="col-12 row">
             <span class="col-12"></span>
             <button type="submit" class="btn btn-primary col-6">Sign up</button>
-            <a href="/signin" class="col-6">Already a user?</a>
+            <a href="/@Role.ToLower()/signin" class="col-6">Already a user?</a>
         </div>
         <br />
 
@@ -45,10 +42,20 @@
 </div>
 @code {
 
-    UserRegister user = new UserRegister();
+    [Parameter]
+    public string MainTitle { get; set; } = "Sign-Up";
+    [Parameter]
+    public string Role { get; set; } = string.Empty;
+
+    UserRegisterRequest user = new UserRegisterRequest();
 
     string message = string.Empty;
     string messageCssClass = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        user.Role = Role;
+    }
 
     async Task HandleRegistration()
     {

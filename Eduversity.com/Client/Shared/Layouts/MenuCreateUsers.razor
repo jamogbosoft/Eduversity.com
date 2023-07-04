@@ -1,0 +1,36 @@
+﻿@inject IToggleMenuService toggleMenuService
+@attribute [Authorize(Roles = "SuperAdmin,Admin")]
+
+<li class="nav-item px-1">
+    <NavLink class="nav-link" @onclick="() => toggleMenuService.TogleSubmenu(NavSubmenu.First)">
+        <span class="oi oi-key"></span>
+        Create Accounts
+    </NavLink>
+</li>
+
+@if (toggleMenuService.Submenu == NavSubmenu.First)
+{
+    <li class="nav-item ps-5 pe-1">
+        <NavLink class="nav-link" @onclick="() => toggleMenuService.ToggleNavMenu()" href="student/signup">
+            Student
+        </NavLink>
+    </li>
+    <li class="nav-item ps-5 pe-1">
+        <NavLink class="nav-link" @onclick="() => toggleMenuService.ToggleNavMenu()" href="lecturer/signup">
+            Lecturer
+        </NavLink>
+    </li>
+    <AuthorizeView Roles="SuperAdmin">
+        <NotAuthorized>
+
+        </NotAuthorized>
+        <Authorized>
+            <li class="nav-item ps-5 pe-1">
+                <NavLink class="nav-link" @onclick="() => toggleMenuService.ToggleNavMenu()" href="admin/signup">
+                    Admin
+                </NavLink>
+            </li>
+        </Authorized>
+    </AuthorizeView>
+}
+<hr />

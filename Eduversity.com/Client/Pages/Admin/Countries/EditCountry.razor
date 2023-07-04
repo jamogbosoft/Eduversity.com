@@ -94,12 +94,12 @@
                 </button>
                 <hr />
             }
-            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
 
         </EditForm>
         @if (!country.IsNew)
         {
-            <button type="button" class="btn btn-danger float-start" @onclick="DeleteCountry">
+            <button type="button" class="btn btn-danger float-end" @onclick="DeleteCountry">
                 Delete Country
             </button>
         }

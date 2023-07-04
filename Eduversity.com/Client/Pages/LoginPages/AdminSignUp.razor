@@ -1,0 +1,10 @@
+﻿@page "/admin/signup"
+@attribute [Authorize(Roles = "SuperAdmin")]
+
+<PageTitle>Sign Up</PageTitle>
+
+<SignUpComponent Role="Admin" MainTitle="Create New Admin Account" />
+
+@code {
+    
+}

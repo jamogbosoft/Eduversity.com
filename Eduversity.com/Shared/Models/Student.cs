@@ -10,13 +10,13 @@ namespace Eduversity.com.Shared.Models
         public long Id { get; set; }
         public long UserId { get; set; } // Foreign key    
 
-        [Required, MaxLength(15)]
+        [Required, MaxLength(20)]
         public string FirstName { get; set; } = string.Empty;
         
-        [MaxLength(15)]
+        [MaxLength(20)]
         public string MiddleName { get; set; } = string.Empty;
 
-        [Required, MaxLength(15)]
+        [Required, MaxLength(25)]
         public string LastName { get; set; } = string.Empty;
         
         [MaxLength(10)]

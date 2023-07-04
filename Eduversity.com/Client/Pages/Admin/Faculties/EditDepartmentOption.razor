@@ -62,11 +62,11 @@
             </div>
             <hr>
 
-            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
         </EditForm>
         @if (!option.IsNew)
         {
-            <button type="button" class="btn btn-danger float-start" @onclick="DeleteOption">
+            <button type="button" class="btn btn-danger float-end" @onclick="DeleteOption">
                 Delete Option
             </button>
         }

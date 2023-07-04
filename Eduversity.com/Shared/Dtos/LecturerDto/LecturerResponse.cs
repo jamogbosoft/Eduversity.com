@@ -7,7 +7,7 @@ namespace Eduversity.com.Shared.Dtos.LecturerDto
         public int Id { get; set; }
         public long UserId { get; set; }
 
-        [Required, MaxLength(45, ErrorMessage = "Name should not exceed 45 characters.")]
+        [Required, MaxLength(50, ErrorMessage = "Name should not exceed 50 characters.")]
         public string Name { get; set; } = string.Empty;
 
         [Required, MaxLength(1, ErrorMessage = "Gender should not exceed 1 character.")]

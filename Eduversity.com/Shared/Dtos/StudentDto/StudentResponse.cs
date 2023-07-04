@@ -7,11 +7,11 @@ namespace Eduversity.com.Shared.Dtos.StudentDto
     {
         public long Id { get; set; }
         public long UserId { get; set; }
-        [Required, MaxLength(15, ErrorMessage = "First name should not exceed 15 characters.")]
+        [Required, MaxLength(20, ErrorMessage = "First name should not exceed 20 characters.")]
         public string FirstName { get; set; } = string.Empty;
-        [MaxLength(15, ErrorMessage = "Middle name should not exceed 15 characters.")]
+        [MaxLength(20, ErrorMessage = "Middle name should not exceed 20 characters.")]
         public string MiddleName { get; set; } = string.Empty;
-        [Required, MaxLength(15, ErrorMessage = "Last name should not exceed 15 characters.")]
+        [Required, MaxLength(25, ErrorMessage = "Last name should not exceed 25 characters.")]
         public string LastName { get; set; } = string.Empty;
 
         [Display(Name = "Date of Birth")]

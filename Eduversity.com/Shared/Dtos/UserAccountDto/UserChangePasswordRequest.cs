@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Eduversity.com.Shared.Dtos.UserAccountDto
 {
-    public class UserChangePassword
+    public class UserChangePasswordRequest
     {
         [Required, StringLength(100, MinimumLength = 6)]
         [DisplayName("Old Password")]

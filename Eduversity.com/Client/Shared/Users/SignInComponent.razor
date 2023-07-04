@@ -1,12 +1,9 @@
-﻿@page "/signin"
-@using Microsoft.AspNetCore.WebUtilities
+﻿@using Microsoft.AspNetCore.WebUtilities
 @inject IAuthService authService
 @inject IToastService toastService
 @inject ILocalStorageService localStorage
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
-
-<PageTitle>Sign In</PageTitle>
 
 <div class="border m-0 p-3 rounded-3">
     <EditForm Model="user" OnValidSubmit="HandleSignIn">
@@ -16,7 +13,7 @@
             <br />
         </div>
         <div>
-            <h3 class="my-main-title">Student Login</h3>
+            <h3 class="my-main-title">@MainTitle</h3>
         </div>
         <div>
             <br />
@@ -26,11 +23,11 @@
         </div>
 
         <div class="col-12 row mb-4">
-            <InputText id="username" @bind-Value="user.UserName" class="form-control rounded-pill " placeholder="Email Address" />
+            <InputText id="username" @bind-Value="user.UserName" class="form-control rounded-pill" placeholder="Email Address" />
             <ValidationMessage For="@(() => user.UserName)" />
         </div>
         <div class="col-12 row mb-4">
-            <InputText id="password" @bind-Value="user.Password" class="form-control rounded-pill " type="Password" placeholder="Password" />
+            <InputText id="password" @bind-Value="user.Password" class="form-control rounded-pill" type="Password" placeholder="Password" />
             <ValidationMessage For="@(() => user.Password)" />
         </div>
         <div class="col-12 row">
@@ -48,7 +45,13 @@
 </div>
 
 @code {
-    private UserLogin user = new UserLogin();
+
+    [Parameter]
+    public string MainTitle { get; set; } = "Sign-In";
+    [Parameter]
+    public string Role { get; set; } = string.Empty;
+
+    private UserLoginRequest user = new UserLoginRequest();
 
     private string message = string.Empty;
     string messageCssClass = string.Empty;
@@ -63,6 +66,8 @@
         {
             returnUrl = url!;
         }
+
+        user.Role = Role;
     }
 
     private async Task HandleSignIn()
@@ -90,7 +95,6 @@
         }
         catch (Exception ex)
         {
-
             messageCssClass = "text-danger";
             toastService.ShowError(ex.Message);
         }
@@ -98,6 +102,6 @@
 
     private void HandleSignUp()
     {
-        navigationManager.NavigateTo("/signup");
+        navigationManager.NavigateTo($"/{Role.ToLower()}/signup");
     }
 }

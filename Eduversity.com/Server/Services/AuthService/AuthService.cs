@@ -24,23 +24,26 @@ namespace Eduversity.com.Server.Services.AuthService
 
         public string GetUserName() => _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
 
-        public async Task<ServiceResponse<string>> SignInAsync(string username, string password)
+        public async Task<ServiceResponse<string>> SignInAsync(UserLoginRequest request)
         {
             var response = new ServiceResponse<string>();
             var user = await _context.Users
                     .Include(u => u.UserRole)
-                    .ThenInclude(ur => ur.Role)
-                    .FirstOrDefaultAsync(u => u.UserName.ToLower().Equals(username.ToLower()));
+                    .ThenInclude(ur => ur!.Role)
+                    .FirstOrDefaultAsync(u => 
+                        u.UserName.ToLower().Equals(request.UserName.ToLower()) && 
+                        u.UserRole!.Role!.Name.ToLower().Equals(request.Role.ToLower())
+                     );
 
             if (user == null)
             {
                 response.Success = false;
-                response.Message = "User not found.";
+                response.Message = "Invalid Credentials."; //User with this role not found.
             }
-            else if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            else if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
                 response.Success = false;
-                response.Message = "Wrong password.";
+                response.Message = "Invalid Credentials."; //Wrong password.
             }
             else
             {
@@ -50,9 +53,18 @@ namespace Eduversity.com.Server.Services.AuthService
             return response;
         }
 
-        public async Task<ServiceResponse<long>> SignUpAsync(User user, string password)
+        public async Task<ServiceResponse<long>> SignUpAsync(UserRegisterRequest request)
         {
-            if (await UserExists(user.UserName))
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == request.Role);
+            if (role == null)
+            {
+                return new ServiceResponse<long>
+                {
+                    Success = false,
+                    Message = "Invalid Role."
+                };
+            }
+            if (await UserExists(request.UserName))
             {
                 return new ServiceResponse<long>
                 {
@@ -61,15 +73,28 @@ namespace Eduversity.com.Server.Services.AuthService
                 };
             }
 
-            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
-
+            var user = new User
+            {
+                UserName = request.UserName,
+                Email = request.UserName,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
+            };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            var userRole = new UserRole
+            {
+                RoleId = role.Id,
+                UserId = user.Id
+            };
+            _context.UserRoles.Add(userRole);
+            await _context.SaveChangesAsync();
+
             return new ServiceResponse<long> { Data = user.Id, Message = "Registration successful!" };
+
         }
 
         public async Task<bool> UserExists(string username)
@@ -145,7 +170,7 @@ namespace Eduversity.com.Server.Services.AuthService
             return jwt;
         }
 
-        public async Task<ServiceResponse<bool>> ChangePasswordAsync(long userId, UserChangePassword request)
+        public async Task<ServiceResponse<bool>> ChangePasswordAsync(long userId, UserChangePasswordRequest request)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
@@ -177,7 +202,8 @@ namespace Eduversity.com.Server.Services.AuthService
 
         public async Task<User> GetUserByUserName(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(username));
+            var response = await _context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(username));
+            return response!;
         }
     }
 }

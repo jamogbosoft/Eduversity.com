@@ -10,7 +10,7 @@ namespace Eduversity.com.Shared.Models
         public int Id { get; set; }
         public long UserId { get; set; } // Foreign key    
 
-        [Required, MaxLength(45)]
+        [Required, MaxLength(50)]
         public string Name { get; set; } = string.Empty;
 
         [Required, MaxLength(1)]

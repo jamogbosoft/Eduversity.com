@@ -116,12 +116,12 @@
                 </button>
                 <hr />
             }
-            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
 
         </EditForm>
         @if (!faculty.IsNew)
         {
-            <button type="button" class="btn btn-danger float-start" @onclick="DeleteFaculty">
+            <button type="button" class="btn btn-danger float-end" @onclick="DeleteFaculty">
                 Delete Faculty
             </button>
         }

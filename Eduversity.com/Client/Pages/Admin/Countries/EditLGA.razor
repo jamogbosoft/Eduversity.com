@@ -56,11 +56,11 @@
             </div>
             <hr>
 
-            <button type="submit" class="btn btn-success float-end">@btnSubmitButtonText</button>
+            <button type="submit" class="btn btn-success float-start">@btnSubmitButtonText</button>
         </EditForm>
         @if (!lga.IsNew)
         {
-            <button type="button" class="btn btn-danger float-start" @onclick="DeleteLGA">
+            <button type="button" class="btn btn-danger float-end" @onclick="DeleteLGA">
                 Delete LGA
             </button>
         }

@@ -1,11 +1,13 @@
-﻿namespace Eduversity.com.Server.Services.AuthService
+﻿using Eduversity.com.Shared.Dtos.UserAccountDto;
+
+namespace Eduversity.com.Server.Services.AuthService
 {
     public interface IAuthService
     {
-        Task<ServiceResponse<long>> SignUpAsync(User user, string password);
+        Task<ServiceResponse<long>> SignUpAsync(UserRegisterRequest request);
         Task<bool> UserExists(string username);
-        Task<ServiceResponse<string>> SignInAsync(string username, string password);
-        Task<ServiceResponse<bool>> ChangePasswordAsync(long userId, UserChangePassword request);
+        Task<ServiceResponse<string>> SignInAsync(UserLoginRequest request);
+        Task<ServiceResponse<bool>> ChangePasswordAsync(long userId, UserChangePasswordRequest request);
         long GetUserId();
         string GetUserName();
         Task<User> GetUserByUserName(string username);

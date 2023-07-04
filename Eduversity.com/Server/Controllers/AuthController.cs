@@ -16,15 +16,9 @@ namespace Eduversity.com.Server.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<ServiceResponse<long>>> SignUpAsync(UserRegister request)
+        public async Task<ActionResult<ServiceResponse<long>>> SignUpAsync(UserRegisterRequest request)
         {
-            var response = await _authService.SignUpAsync(
-                new User
-                {
-                    UserName = request.UserName,
-                    Email = request.UserName
-                },
-                request.Password);
+            var response = await _authService.SignUpAsync(request);
 
             if (!response.Success)
             {
@@ -35,9 +29,9 @@ namespace Eduversity.com.Server.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<ServiceResponse<string>>> SignInAsync(UserLogin request)
+        public async Task<ActionResult<ServiceResponse<string>>> SignInAsync(UserLoginRequest request)
         {
-            var response = await _authService.SignInAsync(request.UserName, request.Password);
+            var response = await _authService.SignInAsync(request);
             if (!response.Success)
             {
                 return BadRequest(response);
@@ -47,7 +41,7 @@ namespace Eduversity.com.Server.Controllers
         }
 
         [HttpPost("change-password"), Authorize]
-        public async Task<ActionResult<ServiceResponse<bool>>> ChangePasswordAsync(UserChangePassword request)
+        public async Task<ActionResult<ServiceResponse<bool>>> ChangePasswordAsync(UserChangePasswordRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var response = await _authService.ChangePasswordAsync(long.Parse(userId!), request);

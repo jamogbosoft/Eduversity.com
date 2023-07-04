@@ -1,0 +1,28 @@
+﻿@inject IToggleMenuService toggleMenuService
+
+<li class="nav-item px-1">
+    <NavLink class="nav-link" @onclick="() => toggleMenuService.TogleSubmenu(NavSubmenu.First)">
+        <span class="oi oi-key"></span>
+        Login
+    </NavLink>
+</li>
+
+@if (toggleMenuService.Submenu == NavSubmenu.First)
+{
+    <li class="nav-item ps-5 pe-1">
+        <NavLink class="nav-link" @onclick="() => toggleMenuService.ToggleNavMenu()" href="student/signin">
+            Student
+        </NavLink>
+    </li>
+    <li class="nav-item ps-5 pe-1">
+        <NavLink class="nav-link" @onclick="() => toggleMenuService.ToggleNavMenu()" href="lecturer/signin">
+            Lecturer
+        </NavLink>
+    </li>
+    <li class="nav-item ps-5 pe-1">
+        <NavLink class="nav-link" @onclick="() => toggleMenuService.ToggleNavMenu()" href="admin/signin">
+            Admin
+        </NavLink>
+    </li>
+}
+<hr />
