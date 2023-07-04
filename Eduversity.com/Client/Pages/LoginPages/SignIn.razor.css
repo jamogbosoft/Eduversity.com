@@ -1,0 +1,25 @@
+﻿
+
+.btncol {
+    flex: 0 0 auto;
+    width: 41.66666667%
+}
+
+.spancol {
+    flex: 0 0 auto;
+    width: 16.66666667%
+}
+
+@media (max-width: 640.98px) {
+
+
+    .btncol {
+        flex: 0 0 auto;
+        width: 100%
+    }
+
+    .spancol {
+        flex: 0 0 auto;
+        width: 100%
+    }
+}

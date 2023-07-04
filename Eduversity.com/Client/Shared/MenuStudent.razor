@@ -1,0 +1,15 @@
+﻿
+<AuthorizeView Roles="Student">
+    <NotAuthorized>
+
+    </NotAuthorized>
+    <Authorized>
+        <li class="nav-item px-1">
+            <NavLink class="nav-link" href="student/profile">
+                <span class="oi oi-person" aria-hidden="true"></span>
+                Profile
+            </NavLink>
+        </li>
+        <hr />
+    </Authorized>
+</AuthorizeView>

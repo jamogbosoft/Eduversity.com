@@ -1,0 +1,235 @@
+﻿@inject IFacultyService facultyService
+@inject IDepartmentService departmentService
+@inject IGenderService genderService
+@inject IMaritalStatusService maritalStatusService
+@inject IPassportService passportService
+@implements IDisposable
+@attribute [Authorize(Roles = "Admin,Lecturer")]
+
+@if (loading)
+{
+    <span>@message</span>
+}
+else
+{
+    <h3 class="my-main-title">Personal Detail</h3>
+
+    <div class="row">
+        <div class="col-sm mb-3">
+            <img src="@(lecturer.Image != string.Empty? lecturer.Image: passportService.DefaultImage)" class="form-control my-passport">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm mb-3">
+            <InputFile id="image" OnChange="OnFileChange" class="form-control"></InputFile>
+        </div>
+        <div class="col-sm mb-3"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm mb-3">
+            <label for="lecturersName">Name</label>
+            <InputText id="lecturersName" @bind-Value="lecturer.Name" class="form-control" required maxlength="45" />
+            <ValidationMessage For="@(() => lecturer.Name)" />
+        </div>
+        <div class="col-sm mb-3">
+            <label for="designation">Designation (Lecturer II, Registrar, Director,...)</label>
+            <InputText id="designation" @bind-Value="lecturer.AcademicDetail.Designation" class="form-control" maxlength="70" />
+            <ValidationMessage For="@(() => lecturer.AcademicDetail.Designation)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm mb-3">
+            <label for="gender">Gender</label>
+            <InputSelect id="gender" @bind-Value="lecturer.Gender" class="form-select" required>
+                <option value="">Select Gender...</option>
+                @foreach (var gender in genderService.Genders)
+                {
+                    <option value="@gender.Value">@gender.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => lecturer.Gender)" />
+        </div>
+        <div class="col-sm mb-3">
+            <label for="maritalStatus">Marital Status</label>
+            <InputSelect id="maritalStatus" @bind-Value="lecturer.MaritalStatus" class="form-select" required>
+                <option value="">Select Marital Status...</option>
+                @foreach (var maritalStatus in maritalStatusService.Status)
+                {
+                    <option value="@maritalStatus.Value">@maritalStatus.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => lecturer.MaritalStatus)" />
+        </div>
+    </div>
+    <p></p>
+    <hr />
+
+    <h3 class="my-main-title">Academic Detail</h3>
+
+    @if (facultyService.Faculties != null && facultyService.Faculties.Count > 0)
+    {
+        <AuthorizeView Roles="Admin">
+            <NotAuthorized Context="NotAuthorizedContext">
+                @if (lecturer.AcademicDetail.DepartmentId == 0)
+                {
+                    <DepartmentInputSelect4Lecturers lecturer="lecturer" />
+                }
+            </NotAuthorized>
+            <Authorized Context="AuthorizedContext">
+                <DepartmentInputSelect4Lecturers lecturer="lecturer" />
+            </Authorized>
+        </AuthorizeView>
+    }
+
+    <div class="row mb-3">
+        <div class="col">
+            <label for="certifications">Certifications (e.g: B.Sc., M.Sc., Ph.D)</label>
+            <InputText id="certifications" @bind-Value="lecturer.AcademicDetail.Certifications" class="form-control" />
+            <ValidationMessage For="@(() => lecturer.AcademicDetail.Certifications)" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="specialization">Specialization</label>
+            <InputTextArea id="specialization" @bind-Value="lecturer.AcademicDetail.Specialisation" class="form-control" />
+            <ValidationMessage For="@(() => lecturer.AcademicDetail.Specialisation)" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="activities">Activities</label>
+            <InputTextArea id="activities" @bind-Value="lecturer.AcademicDetail.Activities" class="form-control" />
+            <ValidationMessage For="@(() => lecturer.AcademicDetail.Activities)" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="affiliation">Professional Affiliation</label>
+            <InputTextArea id="affiliation" @bind-Value="lecturer.AcademicDetail.ProfessionalAffiliation" class="form-control" />
+            <ValidationMessage For="@(() => lecturer.AcademicDetail.ProfessionalAffiliation)" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <label for="award">Award(s)</label>
+            <InputTextArea id="award" @bind-Value="lecturer.AcademicDetail.Award" class="form-control" />
+            <ValidationMessage For="@(() => lecturer.AcademicDetail.Award)" />
+        </div>
+    </div>
+    <hr>
+    @foreach (var qualification in lecturer.AcademicDetail.Qualifications)
+    {
+        <div class="row qualification-body rounded-3 mb-3 p-2">
+            <div class="col-sm-2 mb-1">
+                <InputText id="degree" @bind-Value="qualification.Degree" class="form-control form-control-sm"
+                   disabled="@qualification.IsDeleted" placeholder="Degree" required maxlength="10" />
+                <ValidationMessage For="@(() => qualification.Degree)" />
+            </div>
+            <div class="col-sm-4 mb-1">
+                <InputText id="courseOfStudy" @bind-Value="qualification.CourseOfStudy" class="form-control form-control-sm"
+                   disabled="@qualification.IsDeleted" placeholder="Course of Study" required maxlength="50" />
+                <ValidationMessage For="@(() => qualification.CourseOfStudy)" />
+            </div>
+            <div class="col-sm-3 mb-1">
+                <InputText id="institution" @bind-Value="qualification.Institution" class=" form-control form-control-sm"
+                   disabled="@qualification.IsDeleted" placeholder="Institution" required maxlength="70" />
+                <ValidationMessage For="@(() => qualification.Institution)" />
+            </div>
+            <div class="col-sm-2 mb-1">
+                <InputText id="yearGraduated" @bind-Value="qualification.YearGraduated" class="form-control form-control-sm"
+                   disabled="@qualification.IsDeleted" placeholder="Year Graduated" required maxlength="4" />
+                <ValidationMessage For="@(() => qualification.YearGraduated)" />
+            </div>
+            <div class="col-sm-1">
+                <button id="deleteButton" type="button" class="btn btn-danger btn-sm align-items-center"
+                disabled="@qualification.IsDeleted" @onclick="@(() => RemoveQualification(qualification))">
+                    <i class="oi oi-trash"></i>
+                </button>
+            </div>
+        </div>
+    }
+    <button type="button" class="btn btn-primary mt-3 float-end" @onclick="AddQualification">
+        <i class="oi oi-plus"></i> Add Qualification
+    </button>
+    <br>
+    <br>
+    <hr>
+}
+
+
+@code {
+
+    bool loading = true;
+    string message = "Loading Lecturer...";
+
+    [Parameter]
+    public LecturerResponse lecturer { get; set; } = new();
+
+    [CascadingParameter]
+    public Error error { get; set; }
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            facultyService.FacultiesChanged += StateHasChanged;
+            departmentService.DepartmentsChanged += StateHasChanged;
+
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    public void Dispose()
+    {
+        facultyService.FacultiesChanged -= StateHasChanged;
+        departmentService.DepartmentsChanged -= StateHasChanged;
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            lecturer.Image = await passportService.UploadPassport(e);
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void RemoveQualification(QualificationResponse qualification)
+    {
+        try
+        {
+            if (qualification.Id != 0)
+            {
+                qualification.IsDeleted = true;
+            }
+            else
+            {
+                lecturer.AcademicDetail.Qualifications.Remove(qualification);
+            }
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+
+    private void AddQualification()
+    {
+        try
+        {
+            lecturer.AcademicDetail.Qualifications
+                .Add(new QualificationResponse { LecturerId = lecturer.Id });
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+        }
+    }
+}

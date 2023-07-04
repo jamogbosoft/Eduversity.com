@@ -1,0 +1,46 @@
+﻿@inject IDepartmentHeadService departmentHeadService
+@inject IToastService _toastService
+
+@if (loading)
+{
+    <span>Loading . . .</span>
+}
+<div class="alert alert-primary text-center mt-3">
+    <span>WELCOME TO </span>
+    <AuthorizeView>   
+        <Authorized> 
+           @* @if(context.User.IsInRole("HOD"))
+            {       
+                if (@departmentHeadService.DepartmentHead.DepartmentName != string.Empty)
+                {
+                    <span>THE DEPARTMENT OF @departmentHeadService.DepartmentHead.DepartmentName.ToUpper(), </span>
+                }
+            }*@
+        </Authorized>
+    </AuthorizeView>    
+    <br />
+    <span>CLIFFORD UNIVERSITY, OWERRINTA.</span>
+    
+</div>
+
+@code {
+    //Please refacture this later
+    bool loading = true;
+    [CascadingParameter]
+    public Error error { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            //await departmentHeadService.GetDepartmentHead();
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            error.ProcessError(ex);
+            loading = false;
+        }
+    }
+}
