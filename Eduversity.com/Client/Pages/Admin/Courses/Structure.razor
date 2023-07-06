@@ -8,7 +8,7 @@
 
 <PageTitle>Course Structure</PageTitle>
 
-<div class="border m-0 p-3 rounded-3">
+@*<div class="border m-0 p-3 rounded-3">*@
     @if (loading)
     {
        @* <span>@message</span>*@
@@ -22,7 +22,7 @@
     {
         @if (!isValidOptionId)
         {
-            <h3 class="alert alert-info">@message</h3>
+            <h5 class="alert alert-info">@message</h5>
         }
         else
         {
@@ -30,7 +30,7 @@
             <p></p>
             @if (!addMoreCourses)
             {
-                <button type="button" class="btn btn-primary" @onclick="AddNewCourses">
+                <button type="button" class="btn btn-primary mb-3" @onclick="AddNewCourses">
                     @*<i class="oi oi-plus"></i>*@
                     Add New
                 </button>
@@ -50,7 +50,7 @@
             }
         }
     }
-</div>
+@*</div>*@
 
 @code {
 

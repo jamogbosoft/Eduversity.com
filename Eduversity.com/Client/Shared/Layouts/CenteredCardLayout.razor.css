@@ -10,7 +10,7 @@
 .imgDiv {
     border-right: groove;
     flex: 0 0 auto;
-    width: 50%;
+    width: 45%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,7 +18,7 @@
 .bodyDiv {
     border-left: thick;
     flex: 0 0 auto;
-    width: 50%;
+    width: 55%;
 }
 
 @media (max-width: 640.98px) {
@@ -27,8 +27,9 @@
     }
     .imgDiv {
         border-right: none;
-        flex: 0 0 auto;
-        width: 100%;
+        width: 0px;
+        height: 0px;
+        visibility: hidden;
     }
     .bodyDiv {
         border-left: none;

@@ -1,7 +1,7 @@
 ﻿@inject IGenderService genderService
 @inject IMaritalStatusService maritalStatusService
 @inject IPassportService passportService
-@attribute [Authorize(Roles = "Admin,Student,HOD")]
+@attribute [Authorize(Roles = "Student,HOD,Admin")]
 
 @if (loading)
 {
@@ -9,7 +9,8 @@
 }
 else
 {
-    <div class="row card-details">
+
+    <div class="row card-details shadow">
         <div class="col-sm-6 mb-3">
             <img src="@(student.Image != string.Empty? student.Image: passportService.DefaultImage)" class="form-control my-passport">
             <span><strong>@student.LastName, @student.FirstName @student.MiddleName</strong></span><br /><br>

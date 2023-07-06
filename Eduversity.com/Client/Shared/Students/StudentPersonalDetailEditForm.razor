@@ -9,76 +9,79 @@
 }
 else
 {
-    <h3 class="my-main-title">Personal Detail</h3>
-
-    <div class="row">
-        <div class="col-sm mb-3">
-            <img src="@(student.Image != string.Empty? student.Image: passportService.DefaultImage)"  class="form-control my-passport">
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h5 class="my-main-title">Personal Detail</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm mb-3">
+                    <img src="@(student.Image != string.Empty? student.Image: passportService.DefaultImage)" class="form-control my-passport">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm mb-3">
+                    <InputFile id="image" OnChange="OnFileChange" class="form-control form-control-sm"></InputFile>
+                </div>
+                <div class="col-sm mb-3"></div>
+            </div>
+            <div class="row">
+                <div class="col-sm mb-3">
+                    <label for="firstName">First Name</label>
+                    <InputText id="firstName" @bind-Value="student.FirstName" class="form-control form-control-sm" required maxlength="20" />
+                    <ValidationMessage For="@(() => student.FirstName)" />
+                </div>
+                <div class="col-sm mb-3">
+                    <label for="middleName">Middle Name</label>
+                    <InputText id="middleName" @bind-Value="student.MiddleName" class="form-control form-control-sm" maxlength="20" />
+                    <ValidationMessage For="@(() => student.MiddleName)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm mb-3">
+                    <label for="lastName">Last Name</label>
+                    <InputText id="lastName" @bind-Value="student.LastName" class="form-control form-control-sm" required maxlength="25" />
+                    <ValidationMessage For="@(() => student.LastName)" />
+                </div>
+                <div class="col-sm mb-3">
+                    <label for="dateOfBirth">Date of Birth</label>
+                    <InputDate id="dateOfBirth" @bind-Value="student.DateOfBirth" class="form-control form-control-sm" required maxlength="10" />
+                    <ValidationMessage For="@(() => student.DateOfBirth)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm mb-3">
+                    <label for="gender">Gender</label>
+                    <InputSelect id="gender" @bind-Value="student.Gender" class="form-select form-select-sm" required>
+                        <option value="">Select Gender...</option>
+                        @foreach (var gender in genderService.Genders)
+                        {
+                            <option value="@gender.Value">@gender.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => student.Gender)" />
+                </div>
+                <div class="col-sm mb-3">
+                    <label for="maritalStatus">Marital Status</label>
+                    <InputSelect id="maritalStatus" @bind-Value="student.MaritalStatus" class="form-select form-select-sm" required>
+                        <option value="">Select Marital Status...</option>
+                        @foreach (var maritalStatus in maritalStatusService.Status)
+                        {
+                            <option value="@maritalStatus.Value">@maritalStatus.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => student.MaritalStatus)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm mb-3">
+                    <label for="placeOfBirth">Place of Birth</label>
+                    <InputTextArea id="placeOfBirth" @bind-Value="student.PlaceOfBirth" class="form-control form-control-sm" maxlength="150" />
+                    <ValidationMessage For="@(() => student.PlaceOfBirth)" />
+                </div>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-sm mb-3">
-            <InputFile id="image" OnChange="OnFileChange" class="form-control"></InputFile>
-        </div>
-        <div class="col-sm mb-3"></div>
-    </div>
-    <div class="row">
-        <div class="col-sm mb-3">
-            <label for="firstName">First Name</label>
-            <InputText id="firstName" @bind-Value="student.FirstName" class="form-control" required maxlength="20" />
-            <ValidationMessage For="@(() => student.FirstName)" />
-        </div>
-        <div class="col-sm mb-3">
-            <label for="middleName">Middle Name</label>
-            <InputText id="middleName" @bind-Value="student.MiddleName" class="form-control" maxlength="20" />
-            <ValidationMessage For="@(() => student.MiddleName)" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm mb-3">
-            <label for="lastName">Last Name</label>
-            <InputText id="lastName" @bind-Value="student.LastName" class="form-control" required maxlength="25" />
-            <ValidationMessage For="@(() => student.LastName)" />
-        </div>
-        <div class="col-sm mb-3">
-            <label for="dateOfBirth">Date of Birth</label>
-            <InputDate id="dateOfBirth" @bind-Value="student.DateOfBirth" class="form-control" required maxlength="10" />
-            <ValidationMessage For="@(() => student.DateOfBirth)" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm mb-3">
-            <label for="gender">Gender</label>
-            <InputSelect id="gender" @bind-Value="student.Gender" class="form-select" required>
-                <option value="">Select Gender...</option>
-                @foreach (var gender in genderService.Genders)
-                {
-                    <option value="@gender.Value">@gender.Name</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="@(() => student.Gender)" />
-        </div>
-        <div class="col-sm mb-3">
-            <label for="maritalStatus">Marital Status</label>
-            <InputSelect id="maritalStatus" @bind-Value="student.MaritalStatus" class="form-select" required>
-                <option value="">Select Marital Status...</option>
-                @foreach (var maritalStatus in maritalStatusService.Status)
-                {
-                    <option value="@maritalStatus.Value">@maritalStatus.Name</option>
-                }
-            </InputSelect>
-            <ValidationMessage For="@(() => student.MaritalStatus)" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm mb-3">
-            <label for="placeOfBirth">Place of Birth</label>
-            <InputTextArea id="placeOfBirth" @bind-Value="student.PlaceOfBirth" class="form-control" maxlength="150" />
-            <ValidationMessage For="@(() => student.PlaceOfBirth)" />
-        </div>
-    </div>
-    <p></p>
-    <hr />
 }
 
 @code {
@@ -101,7 +104,7 @@ else
     {
         try
         {
-          student.Image = await passportService.UploadPassport(e);
+            student.Image = await passportService.UploadPassport(e);
         }
         catch (Exception ex)
         {

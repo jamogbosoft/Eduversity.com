@@ -14,7 +14,7 @@ else
         <div class="row mb-3">
             <div class="col">
                 <label for="inputFaculty">Faculty</label>
-                <InputSelect class="form-select" id="inputFaculty"
+                <InputSelect class="form-select form-select-sm" id="inputFaculty"
                          ValueExpression="@(()=>lecturer.AcademicDetail.FacultyId)" Value="@lecturer.AcademicDetail.FacultyId"
                          ValueChanged="@((int value) => OnFacultyValueChanged(value))" required>
                     <option value="0">Select Faculty...</option>
@@ -28,7 +28,7 @@ else
         <div class="row mb-3">
             <div class="col">
                 <label for="inputDepartment">Department</label>
-                <InputSelect class="form-select" id="inputDepartment"
+                <InputSelect class="form-select form-select-sm" id="inputDepartment"
                          ValueExpression="@(()=>lecturer.AcademicDetail.DepartmentId)" Value="@lecturer.AcademicDetail.DepartmentId"
                          ValueChanged="@((int value) => OnDepartmentValueChanged(value))" required>
                     <option value="0">Select Department...</option>

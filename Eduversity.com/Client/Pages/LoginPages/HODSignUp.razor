@@ -1,0 +1,10 @@
+﻿@page "/hod/signup"
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
+
+<PageTitle>Sign Up</PageTitle>
+
+<SignUpComponent Role="HOD" MainTitle="Create New HOD's Account" />
+
+@code {
+    
+}

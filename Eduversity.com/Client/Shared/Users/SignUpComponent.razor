@@ -4,41 +4,38 @@
 @inject IAuthService authService
 @inject IToastService toastService
 
-<div class="border m-0 p-3 rounded-3">
-    <EditForm Model="user" OnValidSubmit="HandleRegistration">
-        <DataAnnotationsValidator></DataAnnotationsValidator>
-        <div>
-            <br />
-        </div>
-        <div>
-            <h3 class="my-main-title">@MainTitle</h3>
-        </div>
-        <div>
-            <br />
-        </div>
-        <div class="col-12 row" style="font-weight:bold">
-            <span class="@messageCssClass col-12 mb-3">@message</span>
-        </div>
-        <div class="col-12 row mb-4">
-            <InputText id="username" @bind-Value="user.UserName" class="form-control rounded-pill" placeholder="Email Address" />
-            <ValidationMessage For="@(() => user.UserName)" />
-        </div>
-        <div class="col-12 row mb-4">
-            <InputText id="password" @bind-Value="user.Password" class="form-control rounded-pill" type="Password" placeholder="Password" />
-            <ValidationMessage For="@(() => user.Password)" />
-        </div>
-        <div class="col-12 row mb-4">
-            <InputText id="confirmPassword" @bind-Value="user.ConfirmPassword" class="form-control rounded-pill" type="Password" placeholder="Confirm Password" />
-            <ValidationMessage For="@(() => user.ConfirmPassword)" />
-        </div>
-        <div class="col-12 row">
-            <span class="col-12"></span>
-            <button type="submit" class="btn btn-primary col-6">Sign up</button>
-            <a href="/@Role.ToLower()/signin" class="col-6">Already a user?</a>
-        </div>
-        <br />
+<div class="card shadow m-0">
+    <div class="card-header">
+        <h5 class="my-main-title">@MainTitle</h5>
+    </div>
+    <div class="card-body">
+        <EditForm Model="user" OnValidSubmit="HandleRegistration">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
 
-    </EditForm>
+            <div class="col-12 row" style="font-weight:bold">
+                <span class="@messageCssClass col-12 mb-3">@message</span>
+            </div>
+            <div class="col-12 row mb-4">
+                <InputText id="username" @bind-Value="user.UserName" class="form-control rounded-pill" placeholder="Email Address" />
+                <ValidationMessage For="@(() => user.UserName)" />
+            </div>
+            <div class="col-12 row mb-4">
+                <InputText id="password" @bind-Value="user.Password" class="form-control rounded-pill" type="Password" placeholder="Password" />
+                <ValidationMessage For="@(() => user.Password)" />
+            </div>
+            <div class="col-12 row mb-4">
+                <InputText id="confirmPassword" @bind-Value="user.ConfirmPassword" class="form-control rounded-pill" type="Password" placeholder="Confirm Password" />
+                <ValidationMessage For="@(() => user.ConfirmPassword)" />
+            </div>
+            <div class="col-12 row">
+                <span class="col-12"></span>
+                <button type="submit" class="btn btn-primary col-6">Sign up</button>
+                <a href="/@Role.ToLower()/signin" class="col-6">Already a user?</a>
+            </div>
+            <br />
+
+        </EditForm>
+    </div>
 </div>
 @code {
 
@@ -68,7 +65,7 @@
             if (result.Success)
             {
                 messageCssClass = "text-success";
-                message += " Login into your account.";
+                message += $" Check your email '{user.UserName}' for the activation code";               //" Login into your account.";
                 toastService.ShowSuccess(message);
             }
             else

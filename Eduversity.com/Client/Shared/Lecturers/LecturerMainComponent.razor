@@ -21,8 +21,15 @@
         }
         else if (!editLecturer)
         {
-            <LecturerDetailStaticForm lecturer="lecturer" />
-            <button class="btn btn-primary px-5" @onclick="HandleEditLecturer">Edit</button>
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="my-main-title">Lecturer's Detail</h5>
+                </div>
+                <div class="card-body">
+                    <LecturerDetailStaticForm lecturer="lecturer" />
+                    <button class="btn btn-primary px-5" @onclick="HandleEditLecturer">Edit</button>
+                </div>
+            </div>
         }
         else
         {

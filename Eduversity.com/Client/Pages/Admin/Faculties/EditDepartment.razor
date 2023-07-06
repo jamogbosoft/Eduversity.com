@@ -10,113 +10,116 @@
 <div class="border m-1 p-3 rounded-3 mb-3">
     @if (loading)
     {
-      @*  <span>@message</span>*@
+        @*  <span>@message</span>*@
         <Loading Message=@message></Loading>
     }
     else
     {
-        <h3 class="my-main-title">Edit Department - "@department.Name" -- Faculty of @FacultyName</h3><hr />
-        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3" @onclick="@(() => BackToFaculties())">
-            Faculties
-            <i class="oi oi-caret-right"></i>
-        </button>
-        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3 mx-3" @onclick="@(() => BackToDepartments())">
-            Depts...
-            <i class="oi oi-caret-right"></i>
-        </button>
-        <br />
-        <br />
-        <br />
+        <h5 class="my-main-title">Edit Department - "@department.Name" -- Faculty of @FacultyName</h5>
 
-        <EditForm Model="department" OnValidSubmit="AddOrUpdateDepartment" class="was-validated">
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-
-            <div class="my-header row">
-                <div class="col-10"></div>
-                <div class="col-5">Department</div>
-                <div class="col-3">Abbrv</div>
-                <div class="col-1 text-align:center">Active</div>
-                <div class="col-1"></div>
+        <hr />
+        <div class="card shadow mb-4">
+            <div class="card-header bg-transparent">
+                <button type="button" class="btn btn-outline-primary btn-sm float-end" @onclick="@(() => BackToFaculties())">
+                    Faculties
+                    <i class="oi oi-caret-right"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm float-end mx-3" @onclick="@(() => BackToDepartments())">
+                    Departments
+                    <i class="oi oi-caret-right"></i>
+                </button>
             </div>
-            <div class="row">
-                <div class="col-10"></div>
-                <div class="col-5">
-                    <InputText id="departmentName" @bind-Value="department.Name" class="form-control form-control-sm"
-                           placeholder="Enter Department" maxlength="50" required>
-                    </InputText>
-                    <ValidationMessage For="@(() => department.Name)" />
-                    <div class="invalid-feedback">Please enter the department name</div>
-                </div>
-                <div class="col-3">
-                    <InputText id="departmentAbbreviation" @bind-Value="department.Abbreviation" class="form-control form-control-sm"
-                        placeholder="Abbreviation" maxlength="3"  required>
-                    </InputText>
-                    <ValidationMessage For="@(() => department.Abbreviation)" />
-                    <div class="invalid-feedback">Please enter the abbreviation</div>
-                </div>
-                <div class="col-1 col-visible">
-                    <InputCheckbox @bind-Value="department.IsActive" class="form-check-input my-check-box"></InputCheckbox>
-                </div>
-                <div class="col-1">
-                </div>
-            </div>
-            <hr>
+            <div class="card-body">
+                <EditForm Model="department" OnValidSubmit="AddOrUpdateDepartment" class="was-validated">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
 
-            @if (!department.IsNew)
-            {
-                <div class="my-header row">
-                    <div class="col-10"></div>
-                    <div class="col-5">Option</div>
-                    <div class="col-3">Abbrv</div>
-                    <div class="col-1 text-align:center">Active</div>
-                    <div class="col-1"></div>
-                </div>
-
-                @foreach (var option in department.Options)
-                {
+                    <div class="my-header row">
+                        <div class="col-10"></div>
+                        <div class="col-5">Department</div>
+                        <div class="col-3">Abbrv</div>
+                        <div class="col-1 text-align:center">Active</div>
+                        <div class="col-1"></div>
+                    </div>
                     <div class="row">
                         <div class="col-10"></div>
                         <div class="col-5">
-                            <InputText id="optionName" @bind-Value="option.Name" class="form-control form-control-sm"
-                                disabled="@option.IsDeleted"  placeholder="Enter Option Name" maxlength="50" required>
+                            <InputText id="departmentName" @bind-Value="department.Name" class="form-control form-control-sm"
+                                   placeholder="Enter Department" maxlength="50" required>
                             </InputText>
-                            <ValidationMessage For="@(() => option.Name)" />
-                            <div class="invalid-feedback">Please enter the option name</div>
+                            <ValidationMessage For="@(() => department.Name)" />
+                            <div class="invalid-feedback">Please enter the department name</div>
                         </div>
                         <div class="col-3">
-                            <InputText id="optionAbbreviation" @bind-Value="option.Abbreviation" class="form-control form-control-sm"
-                           disabled="@option.IsDeleted" placeholder="Abbreviation" maxlength="3" required>
+                            <InputText id="departmentAbbreviation" @bind-Value="department.Abbreviation" class="form-control form-control-sm"
+                                   placeholder="Abbreviation" maxlength="3" required>
                             </InputText>
-                            <ValidationMessage For="@(() => option.Abbreviation)" />
+                            <ValidationMessage For="@(() => department.Abbreviation)" />
                             <div class="invalid-feedback">Please enter the abbreviation</div>
                         </div>
                         <div class="col-1 col-visible">
-                            <InputCheckbox @bind-Value="option.IsActive" class="form-check-input my-check-box" 
-                                disabled="@option.IsDeleted">
-                            </InputCheckbox>
+                            <InputCheckbox @bind-Value="department.IsActive" class="form-check-input my-check-box"></InputCheckbox>
                         </div>
                         <div class="col-1">
-                            <button type="button" class="btn btn-danger btn-sm" disabled="@option.IsDeleted"
-                                @onclick="@(() => RemoveOption(option))" title="Delete Option">
-                                <i class="oi oi-trash"></i>
-                            </button>
                         </div>
                     </div>
+                    <hr>
+
+                    @if (!department.IsNew)
+                    {
+                        <div class="my-header row">
+                            <div class="col-10"></div>
+                            <div class="col-5">Option</div>
+                            <div class="col-3">Abbrv</div>
+                            <div class="col-1 text-align:center">Active</div>
+                            <div class="col-1"></div>
+                        </div>
+
+                        @foreach (var option in department.Options)
+                        {
+                            <div class="row">
+                                <div class="col-10"></div>
+                                <div class="col-5">
+                                    <InputText id="optionName" @bind-Value="option.Name" class="form-control form-control-sm"
+                                   disabled="@option.IsDeleted" placeholder="Enter Option Name" maxlength="50" required>
+                                    </InputText>
+                                    <ValidationMessage For="@(() => option.Name)" />
+                                    <div class="invalid-feedback">Please enter the option name</div>
+                                </div>
+                                <div class="col-3">
+                                    <InputText id="optionAbbreviation" @bind-Value="option.Abbreviation" class="form-control form-control-sm"
+                                   disabled="@option.IsDeleted" placeholder="Abbreviation" maxlength="3" required>
+                                    </InputText>
+                                    <ValidationMessage For="@(() => option.Abbreviation)" />
+                                    <div class="invalid-feedback">Please enter the abbreviation</div>
+                                </div>
+                                <div class="col-1 col-visible">
+                                    <InputCheckbox @bind-Value="option.IsActive" class="form-check-input my-check-box"
+                                       disabled="@option.IsDeleted">
+                                    </InputCheckbox>
+                                </div>
+                                <div class="col-1">
+                                    <button type="button" class="btn btn-danger btn-sm" disabled="@option.IsDeleted"
+                                @onclick="@(() => RemoveOption(option))" title="Delete Option">
+                                        <i class="oi oi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddOption">
+                            <i class="oi oi-plus"></i> Add Option
+                        </button>
+                        <hr />
+                    }
+                    <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
+                </EditForm>
+                @if (!department.IsNew)
+                {
+                    <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteDepartment">
+                        Delete Dept.
+                    </button>
                 }
-                <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddOption">
-                    <i class="oi oi-plus"></i> Add Option
-                </button>
-                <hr />
-            }
-            <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
-        </EditForm>
-        @if (!department.IsNew)
-        {
-            <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteDepartment">
-                Delete Dept.
-            </button>
-        }
-        <br /><br />
+            </div>
+        </div>
     }
 </div>
 
@@ -131,7 +134,7 @@
     bool loading = true;
     string btnSubmitButtonText = "";
     string message = "Loading...";
-    
+
     [CascadingParameter] public Error error { get; set; }
 
     protected override async Task OnParametersSetAsync()

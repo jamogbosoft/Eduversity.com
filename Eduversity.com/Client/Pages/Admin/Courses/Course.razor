@@ -10,87 +10,89 @@
     @if (loading)
     {
         @*<span>@message</span>*@
-        <Loading Message=@message></Loading>
+        <Loading Message=@message />
     }
     else
     {
         @if (Id is null)
         {
             <PageTitle>Create a new Course</PageTitle>
-            <h3 class="my-main-title">Create a new Course</h3>
+            <h5 class="my-main-title">Create a new Course</h5>
         }
         else
         {
             <PageTitle>Edit @course.Code</PageTitle>
-            <h3 class="my-main-title">Edit @course.Code: @course.Title</h3>
+            <h5 class="my-main-title">Edit @course.Code: @course.Title</h5>
         }
 
         <hr />
-        <button type="button" class="btn btn-outline-primary float-end" @onclick="@(() => BackToCourses())">
-            Courses
-            <i class="oi oi-caret-right"></i>
-        </button>
-        <br />
 
-        <br />
-
-        <br />
-
-        <EditForm Model="course" OnSubmit="HandleSubmit" class="was-validated"> 
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="code">Course Code</label>
-                    <InputText id="code" @bind-Value="course.Code" class="form-control" required minlength="7" maxlength="7" />
-                    <ValidationMessage For="@(() => course.Code)" />
-                    <div class="invalid-feedback">Please enter the course code</div>
-                </div>
-                <div class="col-md-3">
-                    <label for="unit">Unit</label>
-                    <InputNumber id="unit" @bind-Value="course.Unit" class="form-control" min="0" max="6" required />
-                    <ValidationMessage For="@(() => course.Unit)" />
-                    <div class="invalid-feedback">Invalid course unit</div>
-                </div>
-                <div class="col-md-3">
-                    <label for="status">Status</label>
-                    <InputSelect id="status" @bind-Value="course.Status" class="form-select" required>
-                        <option value="" disabled>Choose...</option>
-                        <option value="C">C - Compulsory</option>
-                        <option value="R">R - Required</option>
-                        <option value="G">G - GST</option>
-                        <option value="E">E - Elective</option>
-                    </InputSelect>
-                    <ValidationMessage For="@(() => course.Status)" />
-                    <div class="invalid-feedback">Please select the course status</div>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="title">Course Title</label>
-                    <InputText id="title" @bind-Value="course.Title" class="form-control" required maxlength="75" />
-                    <ValidationMessage For="@(() => course.Title)" />
-                    <div class="invalid-feedback">Please enter the course title</div>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col col-visible">
-                    <label for="active">Active? </label>
-                    <InputCheckbox id="active" @bind-Value="course.IsActive" class="form-check-input my-check-box"></InputCheckbox>
-                </div>
-            </div>
-            <br />
-
-            <button type="submit" class="btn btn-primary mb-2 float-start">@btnSubmitText</button>
-            @if (Id is not null)
-            {
-                <button type="button" class="btn btn-danger mb-2 float-end" @onclick="DeleteCourse">
-                    <i class="oi oi-trash"></i>
-                    Delete Course
+        <div class="card shadow mb-4">
+            <div class="card-header bg-transparent">
+                <button type="button" class="btn btn-sm btn-outline-primary float-end" @onclick="@(() => BackToCourses())">
+                    Courses
+                    <i class="oi oi-caret-right"></i>
                 </button>
-            }
-            <br />  <br />
-        </EditForm>
+            </div>
+            <div class="card-body">
+
+                <EditForm Model="course" OnSubmit="HandleSubmit" class="was-validated">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="code">Course Code</label>
+                            <InputText id="code" @bind-Value="course.Code" class="form-control form-control-sm" required minlength="7" maxlength="7" />
+                            <ValidationMessage For="@(() => course.Code)" />
+                            <div class="invalid-feedback">Please enter the course code</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="unit">Unit</label>
+                            <InputNumber id="unit" @bind-Value="course.Unit" class="form-control form-control-sm" min="0" max="6" required />
+                            <ValidationMessage For="@(() => course.Unit)" />
+                            <div class="invalid-feedback">Invalid course unit</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status">Status</label>
+                            <InputSelect id="status" @bind-Value="course.Status" class="form-select form-select-sm" required>
+                                <option value="" disabled>Choose...</option>
+                                <option value="C">C - Compulsory</option>
+                                <option value="R">R - Required</option>
+                                <option value="G">G - GST</option>
+                                <option value="E">E - Elective</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => course.Status)" />
+                            <div class="invalid-feedback">Please select the course status</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="title">Course Title</label>
+                            <InputText id="title" @bind-Value="course.Title" class="form-control form-control-sm" required maxlength="75" />
+                            <ValidationMessage For="@(() => course.Title)" />
+                            <div class="invalid-feedback">Please enter the course title</div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col col-visible">
+                            <label for="active">Active? </label>
+                            <InputCheckbox id="active" @bind-Value="course.IsActive" class="form-check-input my-check-box"></InputCheckbox>
+                        </div>
+                    </div>
+                    <br />
+
+                    <button type="submit" class="btn btn-sm btn-primary mb-2 float-start">@btnSubmitText</button>
+                    @if (Id is not null)
+                    {
+                        <button type="button" class="btn btn-sm btn-danger mb-2 float-end" @onclick="DeleteCourse">
+                            <i class="oi oi-trash"></i>
+                            Delete Course
+                        </button>
+                    }
+                    <br />  <br />
+                </EditForm>
+            </div>
+        </div>
     }
 </div>
 
@@ -170,7 +172,7 @@
     async Task DeleteCourse()
     {
         try
-        {           
+        {
             bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
                 $"Do you really want to delete '{course.Code}: {course.Title}'?");
             if (confirmed)

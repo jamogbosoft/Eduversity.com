@@ -6,59 +6,74 @@
 @attribute [Authorize(Roles = "Admin")]
 
 <div class="border m-1 p-3 rounded-3 mb-3">
-    <h3 class="my-main-title">Lecturers</h3><hr />
+    <h5 class="my-main-title">Lecturers</h5><hr />
 
-@if (loading)
-{
-    <span>@message</span>
-}
-else
-{
-    @if (lecturerService.Lecturers == null || lecturerService.Lecturers.Count == 0)
+    @if (loading)
     {
-            <span>No Record Found</span>
+        <span>@message</span>
     }
     else
     {
-            <table class="table table-sm table-striped border">
-            <thead>
-                <tr>
-                    <th>Department</th>
-                    <th>Lecturer</th>
-                    <th>Gender</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <Virtualize Items="lecturerService.Lecturers" Context="lecturer">
-                    <tr>
-                        <td>
-                            <span>@lecturer.AcademicDetail.DepartmentName</span>
-                        </td>
-                        <td>
-                            <span>@lecturer.Name</span>
-                        </td>
-                        <td>
-                            <span>@GetGender(lecturer)</span>
-                        </td>
-                        <td class="my-text-align-center">
-                            <button class="btn btn-primary btn-sm position-relative" @onclick="(() => ViewProfile(lecturer.UserId))" title="View Profile">
-                                <i class="oi oi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </Virtualize>
-            </tbody>
-        </table>
-
-        for (var i = 1; i <= lecturerService.PageCount; i++)
+        @if (lecturerService.Lecturers == null || lecturerService.Lecturers.Count == 0)
         {
-            <a class="btn
-                 @(i == lecturerService.CurrentPage ? "btn-primary" : "btn-outline-primary")
-                 page-selection me-2"
-       href="/@From/lecturers/search/@lecturerService.LastSearchText/@i">@i</a>
+            <span>No Record Found</span>
         }
-    }}
+        else
+        {
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        List of Lecturers
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped border">
+                            <thead class="bg-light">
+
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Lecturer</th>
+                                    <th>Gender</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Virtualize Items="lecturerService.Lecturers" Context="lecturer">
+                                    <tr>
+                                        <td>
+                                            <span>@lecturer.AcademicDetail.DepartmentName</span>
+                                        </td>
+                                        <td>
+                                            <span>@lecturer.Name</span>
+                                        </td>
+                                        <td>
+                                            <span>@GetGender(lecturer)</span>
+                                        </td>
+                                        <td class="my-text-align-center">
+                                            <button class="btn btn-primary btn-sm position-relative" @onclick="(() => ViewProfile(lecturer.UserId))" title="View Profile">
+                                                <i class="oi oi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </Virtualize>
+                            </tbody>
+                        </table>
+
+                        @for (var i = 1; i <= lecturerService.PageCount; i++)
+                        {
+                            <a class="btn
+                                 @(i == lecturerService.CurrentPage ? "btn-primary" : "btn-outline-primary")
+                                 page-selection me-2"
+                                 href="/@From/lecturers/search/@lecturerService.LastSearchText/@i">@i
+                            </a>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
 
 </div>
 

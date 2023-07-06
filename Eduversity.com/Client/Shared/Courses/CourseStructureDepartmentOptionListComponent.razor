@@ -6,37 +6,43 @@
 
 <div class="border m-1 p-3 rounded-3">
 
-    <h3 class="my-main-title">Manage Departmental Course Structure</h3><hr />
+    <h5 class="my-main-title">Manage Departmental Course Structure</h5><hr />
 
     @if (loading)
     {
-      @*  <span>@message</span>*@
+        @*  <span>@message</span>*@
         <Loading Message=@message></Loading>
     }
     else
     {
-        <table class="table table-striped table-sm border">
-            <thead>
-                <tr>
-                    <th>Programme</th>
-                    <th style="text-align:center">Abbr.</th>
-                    <th style="text-align:center">Edit</th>
-                </tr>
-            </thead>
-            <tbody >
-                <Virtualize Items="departmentOptionService.DepartmentOptions" Context="option">
-                    <tr>
-                        <td>@option.Name</td>
-                        <td style="text-align:center">@option.Abbreviation</td>
-                        <td class="my-text-align-center">
-                            <button class="btn btn-outline-dark btn-sm" @onclick="(() => EditCourseStructure(option.Id))" title="Edit Course Structure">
-                                <i class="oi oi-list"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </Virtualize>
-            </tbody>
-        </table>
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped border">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Programme</th>
+                                <th style="text-align:center">Abbr.</th>
+                                <th style="text-align:center">Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <Virtualize Items="departmentOptionService.DepartmentOptions" Context="option">
+                                <tr>
+                                    <td>@option.Name</td>
+                                    <td style="text-align:center">@option.Abbreviation</td>
+                                    <td class="my-text-align-center">
+                                        <button class="btn btn-outline-dark btn-sm" @onclick="(() => EditCourseStructure(option.Id))" title="Edit Course Structure">
+                                            <i class="oi oi-list"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </Virtualize>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     }
 </div>
 

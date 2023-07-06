@@ -3,13 +3,13 @@
 @inject IDepartmentService departmentService
 @inject IDepartmentOptionService departmentOptionService
 @inject IToastService _toastService
-@attribute [Authorize(Roles = "Admin,Student")]
+@attribute [Authorize(Roles = "Student,Admin")]
 
 <div class="border m-0 p-3 rounded-3">
     @if (loading)
     {
-      @*<span>@message</span>*@
-       <Loading Message=@message></Loading>
+        @*<span>@message</span>*@
+        <Loading Message=@message></Loading>
     }
     else
     {
@@ -22,19 +22,25 @@
         }
         else if (!editStudent)
         {
-            <StudentDetailStaticForm student="student"  />        
+                <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="my-main-title">Student's Detail</h5>
+                </div>
+                <div class="card-body">
+                    <StudentDetailStaticForm student="student" />
 
-            <AuthorizeView Roles="Admin">            
-                <Authorized>
-                    <hr />
-                    <button class="btn btn-primary px-5" @onclick="HandleEditStudent">Edit</button>
-                </Authorized>
-            </AuthorizeView>
+                    <AuthorizeView Roles="Admin">
+                        <Authorized>
+                            <button class="btn btn-primary px-5" @onclick="HandleEditStudent">Edit</button>
+                        </Authorized>
+                    </AuthorizeView>
+                </div>
+            </div>
         }
         else
         {
             <EditForm Model="student" OnValidSubmit="SubmitStudent" class="was-validated">
-                <DataAnnotationsValidator></DataAnnotationsValidator>                
+                <DataAnnotationsValidator></DataAnnotationsValidator>
                 <AuthorizeView Roles="Admin">
                     <NotAuthorized Context="NotAuthorizedContext">
                         @if (student.Id == 0)

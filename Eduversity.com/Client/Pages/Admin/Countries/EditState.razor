@@ -10,96 +10,95 @@
 <div class="border m-1 p-3 rounded-3 mb-3">
     @if (loading)
     {
-       @* <span>@message</span>*@
+        @* <span>@message</span>*@
         <Loading Message=@message></Loading>
     }
     else
     {
-        <h3 class="my-main-title">Edit State - "@state.Name" in @CountryName</h3><hr />
+        <h5 class="my-main-title">Edit State - "@state.Name" in @CountryName</h5>
 
-        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3" @onclick="@(() => BackToCountries())">
-            Countries
-            <i class="oi oi-caret-right"></i>
-        </button>
-        <button type="button" class="btn btn-outline-primary btn-sm float-end mb-3 mx-3" @onclick="@(() => BackToStates())">
-            States
-            <i class="oi oi-caret-right"></i>
-        </button>
-        <br />
-
-        <br />
-
-        <br />
-
-        <EditForm Model="state" OnValidSubmit="AddOrUpdateState" class="was-validated">
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-
-            <div class="my-header row">
-                <div class="col">State</div>
-                <div class="col text-align:center">Active</div>
-                <div class="col"></div>
+        <hr />
+        <div class="card shadow mb-4">
+            <div class="card-header bg-transparent">
+                <button type="button" class="btn btn-outline-primary btn-sm float-end" @onclick="@(() => BackToCountries())">
+                    Countries
+                    <i class="oi oi-caret-right"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm float-end mx-3" @onclick="@(() => BackToStates())">
+                    States
+                    <i class="oi oi-caret-right"></i>
+                </button>
             </div>
-            <div class="row">
-                <div class="col">
-                    <InputText id="stateName" @bind-Value="state.Name" class="form-control form-control-sm" placeholder="Enter State" maxlength="30" required></InputText>
-                    <ValidationMessage For="@(() => state.Name)" />
-                    <div class="invalid-feedback">Please enter the state name</div>
-                </div>
-                <div class="col col-visible">
-                    <InputCheckbox @bind-Value="state.IsActive" class="form-check-input my-check-box"></InputCheckbox>
-                </div>
-                <div class="col">
-                </div>
-            </div>
-            <hr>
+            <div class="card-body">
 
-            @if (!state.IsNew)
-            {
-                <div class="my-header row">
-                    <div class="col">Local Governments</div>
-                    <div class="col text-align:center">Active</div>
-                    <div class="col"></div>
-                </div>
+                <EditForm Model="state" OnValidSubmit="AddOrUpdateState" class="was-validated">
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
 
-                @foreach (var lga in state.LGAs)
-                {
+                    <div class="my-header row">
+                        <div class="col">State</div>
+                        <div class="col text-align:center">Active</div>
+                        <div class="col"></div>
+                    </div>
                     <div class="row">
                         <div class="col">
-                            <InputText id="lgaName" @bind-Value="lga.Name" class="form-control form-control-sm"
-                                disabled="@lga.IsDeleted" placeholder="Enter LGA" required>
-                            </InputText>
-                            <ValidationMessage For="@(() => lga.Name)" />
-                            <div class="invalid-feedback">Please enter the LGA name</div>
+                            <InputText id="stateName" @bind-Value="state.Name" class="form-control form-control-sm" placeholder="Enter State" maxlength="30" required></InputText>
+                            <ValidationMessage For="@(() => state.Name)" />
+                            <div class="invalid-feedback">Please enter the state name</div>
                         </div>
                         <div class="col col-visible">
-                            <InputCheckbox @bind-Value="lga.IsActive" class="form-check-input my-check-box" 
-                                disabled="@lga.IsDeleted">
-                            </InputCheckbox>
+                            <InputCheckbox @bind-Value="state.IsActive" class="form-check-input my-check-box"></InputCheckbox>
                         </div>
                         <div class="col">
-                            <button type="button" class="btn btn-danger btn-sm" disabled="@lga.IsDeleted"
-                                @onclick="@(() => RemoveLGA(lga))" title="Delete LGA">
-                                <i class="oi oi-trash"></i>
-                            </button>
                         </div>
                     </div>
-                }
-                <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddLGA">
-                    <i class="oi oi-plus"></i> Add LGA
-                </button>
-                <hr />
-            }
-            <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
-        </EditForm>
-        @if (!state.IsNew)
-        {
-            <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteState">
-                Delete State
-            </button>
-        }
-        <br />
+                    <hr>
 
-        <br />
+                    @if (!state.IsNew)
+                    {
+                        <div class="my-header row">
+                            <div class="col">Local Governments</div>
+                            <div class="col text-align:center">Active</div>
+                            <div class="col"></div>
+                        </div>
+
+                        @foreach (var lga in state.LGAs)
+                        {
+                            <div class="row">
+                                <div class="col">
+                                    <InputText id="lgaName" @bind-Value="lga.Name" class="form-control form-control-sm"
+                                   disabled="@lga.IsDeleted" placeholder="Enter LGA" required>
+                                    </InputText>
+                                    <ValidationMessage For="@(() => lga.Name)" />
+                                    <div class="invalid-feedback">Please enter the LGA name</div>
+                                </div>
+                                <div class="col col-visible">
+                                    <InputCheckbox @bind-Value="lga.IsActive" class="form-check-input my-check-box"
+                                       disabled="@lga.IsDeleted">
+                                    </InputCheckbox>
+                                </div>
+                                <div class="col">
+                                    <button type="button" class="btn btn-danger btn-sm" disabled="@lga.IsDeleted"
+                                @onclick="@(() => RemoveLGA(lga))" title="Delete LGA">
+                                        <i class="oi oi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        <button type="button" class="btn btn-primary btn-sm mt-3" @onclick="AddLGA">
+                            <i class="oi oi-plus"></i> Add LGA
+                        </button>
+                        <hr />
+                    }
+                    <button type="submit" class="btn btn-success btn-sm float-start">@btnSubmitButtonText</button>
+                </EditForm>
+                @if (!state.IsNew)
+                {
+                    <button type="button" class="btn btn-danger btn-sm float-end" @onclick="DeleteState">
+                        Delete State
+                    </button>
+                }
+            </div>
+        </div>
     }
 </div>
 

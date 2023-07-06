@@ -9,7 +9,7 @@
 }
 else
 {
-    <div class="row card-details">
+    <div class="row card-details shadow">
         <div class="col-sm-4 mb-3">
             <img src="@(lecturer.Image != string.Empty? lecturer.Image: passportService.DefaultImage)" class="form-control my-passport">
             <span><strong>@lecturer.Name</strong></span><br>
@@ -31,10 +31,11 @@ else
 
     @if (lecturer.AcademicDetail.Qualifications != null && lecturer.AcademicDetail.Qualifications.Count != 0)
     {
-        <h3 class="my-main-title">Qualifications</h3>
+        <h5 class="my-main-title">Qualifications</h5>
 
-        <table class="table table-striped table-sm border text-sm-start table-responsive-sm row-col-sm-10 d-xxl-table-row">
-            <thead>
+        <div class="table-responsive table-responsive-sm">
+        <table class="table table-striped table-sm border text-sm-start row-col-sm-10 d-xxl-table-row">
+            <thead class="bg-light">
                 <tr>
                     <th>Degree</th>
                     <th>Course</th>
@@ -53,6 +54,7 @@ else
                 </Virtualize>
             </tbody>
         </table>
+        </div>
         <hr />
     }
 }

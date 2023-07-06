@@ -7,64 +7,76 @@
 @attribute [Authorize(Roles = "Admin,HOD")]
 
 <div class="border m-1 p-3 rounded-3 mb-3">
-    <h3 class="my-main-title">Students</h3><hr />
+    <h5 class="my-main-title">Students</h5><hr />
 
-@if (loading)
-{
-    <span>@message</span>
-}
-else
-{
-    @if (studentService.Students == null || studentService.Students.Count == 0)
+    @if (loading)
     {
-        <span>No Record Found</span>
+        <span>@message</span>
     }
     else
     {
-            <table class="table table-sm table-striped border">
-            <thead>
-                <tr >
-                    <th>Student</th>
-                    <th>Gender</th>
-                    <th>Reg. Number</th>
-                    <th>Course of Study</th>
-                    <th style="text-align:center">Level</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <Virtualize Items="studentService.Students" Context="student">
-                    <tr >
-                        <td>
-                            <span>@student.LastName, @student.FirstName @student.MiddleName</span>
-                        </td>
-                        <td>
-                            <span>
-                                @GetGender(student)
-                            </span>
-                        </td>
-                        <td><span>@student.AcademicDetail.RegNumber</span> </td>
-                        <td><span>@student.AcademicDetail.DepartmentOptionName</span> </td>
-                        <td class="my-text-align-center"><span>@student.AcademicDetail.Level</span> </td>
-                        <td class="my-text-align-center">
-                            <button class="btn btn-primary btn-sm position-relative" @onclick="(() => ViewProfile(student.UserId))" title="View Profile">
-                                <i class="oi oi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </Virtualize>
-            </tbody>
-        </table>
-
-        for (var i = 1; i <= studentService.PageCount; i++)
+        @if (studentService.Students == null || studentService.Students.Count == 0)
         {
-            <a class="btn
-                 @(i == studentService.CurrentPage ? "btn-primary" : "btn-outline-primary")
-                 page-selection me-2"
-       href="/@From/students/search/@studentService.LastSearchText/@i">@i</a>
-        }          
+            <span>No Record Found</span>
+        }
+        else
+        {
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        List of Students
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped border">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Gender</th>
+                                    <th>Reg. Number</th>
+                                    <th>Course of Study</th>
+                                    <th style="text-align:center">Level</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <Virtualize Items="studentService.Students" Context="student">
+                                    <tr>
+                                        <td>
+                                            <span>@student.LastName, @student.FirstName @student.MiddleName</span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                @GetGender(student)
+                                            </span>
+                                        </td>
+                                        <td><span>@student.AcademicDetail.RegNumber</span> </td>
+                                        <td><span>@student.AcademicDetail.DepartmentOptionName</span> </td>
+                                        <td class="my-text-align-center"><span>@student.AcademicDetail.Level</span> </td>
+                                        <td class="my-text-align-center">
+                                            <button class="btn btn-primary btn-sm position-relative" @onclick="(() => ViewProfile(student.UserId))" title="View Profile">
+                                                <i class="oi oi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </Virtualize>
+                            </tbody>
+                        </table>
+
+                        @for (var i = 1; i <= studentService.PageCount; i++)
+                        {
+                            <a class="btn
+                                 @(i == studentService.CurrentPage ? "btn-primary" : "btn-outline-primary")
+                                 page-selection me-2"
+                                 href="/@From/students/search/@studentService.LastSearchText/@i">@i
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     }
-}
 
 </div>
 

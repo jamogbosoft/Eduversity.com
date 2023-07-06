@@ -20,9 +20,9 @@ namespace Eduversity.com.Server.Services.AuthService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public long GetUserId() => long.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        public long GetUserId() => long.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        public string GetUserName() => _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
+        public string GetUserName() => _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Name)!;
 
         public async Task<ServiceResponse<string>> SignInAsync(UserLoginRequest request)
         {
@@ -35,19 +35,25 @@ namespace Eduversity.com.Server.Services.AuthService
                         u.UserRole!.Role!.Name.ToLower().Equals(request.Role.ToLower())
                      );
 
+            // Customize the messages against cyber attack
             if (user == null)
             {
                 response.Success = false;
-                response.Message = "Invalid Credentials."; //User with this role not found.
+                response.Message = "Invalid credentials."; //User with this role not found.
             }
             else if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
                 response.Success = false;
-                response.Message = "Invalid Credentials."; //Wrong password.
+                response.Message = "Invalid credentials."; //Wrong password.
+            }
+            else if (user.VerifiedAt == null)
+            {
+                response.Success = false;
+                response.Message = "Invalid credentials."; //Account not verified.
             }
             else
             {
-                response.Data = CreateToken(user);
+                response.Data = CreateJwtToken(user);
             }
 
             return response;
@@ -61,7 +67,7 @@ namespace Eduversity.com.Server.Services.AuthService
                 return new ServiceResponse<long>
                 {
                     Success = false,
-                    Message = "Invalid Role."
+                    Message = "Invalid role."
                 };
             }
             if (await UserExists(request.UserName))
@@ -80,7 +86,8 @@ namespace Eduversity.com.Server.Services.AuthService
                 UserName = request.UserName,
                 Email = request.UserName,
                 PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt
+                PasswordSalt = passwordSalt,
+                VerificationToken = CreateRandomToken()
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -94,12 +101,11 @@ namespace Eduversity.com.Server.Services.AuthService
             await _context.SaveChangesAsync();
 
             return new ServiceResponse<long> { Data = user.Id, Message = "Registration successful!" };
-
         }
 
         public async Task<bool> UserExists(string username)
         {
-            if (await _context.Users.AnyAsync(user => user.UserName.ToLower()
+            if (await _context.Users.AnyAsync(u => u.UserName.ToLower()
                  .Equals(username.ToLower())))
             {
                 return true;
@@ -127,7 +133,12 @@ namespace Eduversity.com.Server.Services.AuthService
             }
         }
 
-        private string CreateToken(User user)
+        private string CreateRandomToken()
+        {
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
+        }
+
+        private string CreateJwtToken(User user)
         {
             /*
             List<Claim> claims = new List<Claim>
@@ -143,6 +154,7 @@ namespace Eduversity.com.Server.Services.AuthService
             {
                 throw new Exception("Invalid User");
             }
+
             var claimsIdentity = new ClaimsIdentity(
                 new[]
                 {
@@ -155,8 +167,9 @@ namespace Eduversity.com.Server.Services.AuthService
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, user.UserRole.Role.Name));
             }
 
+            var appToken = _configuration.GetSection("AppSettings:Token").Value;
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
-                .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+                .GetBytes(appToken!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
@@ -204,6 +217,74 @@ namespace Eduversity.com.Server.Services.AuthService
         {
             var response = await _context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(username));
             return response!;
+        }
+
+        public async Task<ServiceResponse<bool>> VerifyEmailAsync(VerifyEmailRequest request)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => 
+                    u.VerificationToken! == request.Token &&
+                    u.Email == request.Email);
+
+            if (user == null)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Invalid token."
+                };
+            }
+
+            user.VerifiedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<bool> { Data = true, Message = "User Verified." };
+        }
+
+        public async Task<ServiceResponse<bool>> ForgotPasswordAsync(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "User not found."
+                };
+            }
+
+            user.PasswordResetToken = CreateRandomToken();
+            user.ResetTokenExpires = DateTime.Now.AddDays(1);
+            await _context.SaveChangesAsync();
+
+            return new ServiceResponse<bool> { Data = true, Message = "Please, check your email for the password reset token." };
+        }
+
+        public async Task<ServiceResponse<bool>> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => 
+                    u.PasswordResetToken == request.Token && 
+                    u.Email == request.Email);
+
+            if (user == null || user.ResetTokenExpires < DateTime.Now)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Invalid Token."
+                };
+            }
+
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+            user.PasswordResetToken = null;
+            user.ResetTokenExpires = null;
+
+            await _context.SaveChangesAsync();
+            return new ServiceResponse<bool> { Data = true, Message = "Password reset is successful." };
         }
     }
 }

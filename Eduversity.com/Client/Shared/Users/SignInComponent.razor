@@ -5,44 +5,40 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
 
-<div class="border m-0 p-3 rounded-3">
-    <EditForm Model="user" OnValidSubmit="HandleSignIn">
-        <DataAnnotationsValidator />
+<div class="card shadow m-0">
+    <div class="card-header">
+        <h5 class="my-main-title">@MainTitle</h5>
+    </div>
+    <div class="card-body">
+        <EditForm Model="user" OnValidSubmit="HandleSignIn">
+            <DataAnnotationsValidator />
+            
+            <div class="col-12 row" style="font-weight:bold">
+                <span class="@messageCssClass col-12 mb-3">@message</span>
+            </div>
 
-        <div>
-            <br />
-        </div>
-        <div>
-            <h3 class="my-main-title">@MainTitle</h3>
-        </div>
-        <div>
-            <br />
-        </div>
-        <div class="col-12 row" style="font-weight:bold">
-            <span class="@messageCssClass col-12 mb-3">@message</span>
-        </div>
+            <div class="col-12 row mb-4">
+                <InputText id="username" @bind-Value="user.UserName" class="form-control rounded-pill" placeholder="Email Address" />
+                <ValidationMessage For="@(() => user.UserName)" />
+            </div>
+            <div class="col-12 row mb-4">
+                <InputText id="password" @bind-Value="user.Password" class="form-control rounded-pill" type="Password" placeholder="Password" />
+                <ValidationMessage For="@(() => user.Password)" />
+            </div>
+            <div class="col-12 row">
+                <span class="col-12"></span>
+                <button type="submit" class="btn btn-primary btncol mb-3">Login</button>
+                <span class="spancol"></span>
 
-        <div class="col-12 row mb-4">
-            <InputText id="username" @bind-Value="user.UserName" class="form-control rounded-pill" placeholder="Email Address" />
-            <ValidationMessage For="@(() => user.UserName)" />
-        </div>
-        <div class="col-12 row mb-4">
-            <InputText id="password" @bind-Value="user.Password" class="form-control rounded-pill" type="Password" placeholder="Password" />
-            <ValidationMessage For="@(() => user.Password)" />
-        </div>
-        <div class="col-12 row">
-            <span class="col-12"></span>
-            <button type="submit" class="btn btn-primary btncol mb-3">Login</button>
-            <span class="spancol"></span>
-
-            <button @onclick="HandleSignUp" class="btn btn-outline-success btncol mb-3">Create Account</button>
-        </div>
-        <div class="col-12">
+                <button @onclick="HandleSignUp" class="btn btn-outline-success btncol mb-3">Create Account</button>
+            </div>
+            <div class="col-12">
+                <br />
+                <a href="/forgot-password" class="col-12">Forgot password?</a>
+            </div>
             <br />
-            <a href="/passwordrecovery" class="col-12">Forgotten password?</a>
-        </div>
-        <br />
-    </EditForm>
+        </EditForm>
+    </div>
 </div>
 
 @code {
