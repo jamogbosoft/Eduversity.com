@@ -1,7 +1,6 @@
-﻿using Azure.Core;
+﻿using Eduversity.com.Server.Services.EmailService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Eduversity.com.Server.Controllers
@@ -57,7 +56,7 @@ namespace Eduversity.com.Server.Controllers
         }
 
         [HttpPost("verify-email")]
-        public async Task<ActionResult<ServiceResponse<bool>>> VerifyEmailAsync(VerifyEmailRequest request)
+        public async Task<ActionResult<ServiceResponse<bool>>> VerifyEmailAsync(UserEmailVerificationRequest request)
         {
             var response = await _authService.VerifyEmailAsync(request);
             if (!response.Success)
@@ -69,9 +68,9 @@ namespace Eduversity.com.Server.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<ActionResult<ServiceResponse<bool>>> ForgotPasswordAsync(string email)
+        public async Task<ActionResult<ServiceResponse<bool>>> ForgotPasswordAsync(UserForgotPasswordRequest request)
         {
-            var response = await _authService.ForgotPasswordAsync(email);
+            var response = await _authService.ForgotPasswordAsync(request.Email);
             if (!response.Success)
             {
                 return BadRequest(response);
@@ -81,9 +80,21 @@ namespace Eduversity.com.Server.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<ActionResult<ServiceResponse<bool>>> ResetPasswordAsync(ResetPasswordRequest request)
+        public async Task<ActionResult<ServiceResponse<bool>>> ResetPasswordAsync(UserPasswordResetRequest request)
         {
             var response = await _authService.ResetPasswordAsync(request);
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("resend-verification-token")]
+        public async Task<ActionResult<ServiceResponse<bool>>> ResendVerificationTokenAsync(UserResendVerificationTokenRequest request)
+        {
+            var response = await _authService.ResendVerificationTokenAsync(request.Email);
             if (!response.Success)
             {
                 return BadRequest(response);

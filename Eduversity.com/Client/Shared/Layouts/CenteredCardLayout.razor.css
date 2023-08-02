@@ -10,7 +10,7 @@
 .imgDiv {
     border-right: groove;
     flex: 0 0 auto;
-    width: 45%;
+    width: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,7 +18,7 @@
 .bodyDiv {
     border-left: thick;
     flex: 0 0 auto;
-    width: 55%;
+    width: 50%;
 }
 
 @media (max-width: 640.98px) {

@@ -9,6 +9,7 @@ global using Eduversity.com.Client.Services.CourseStructureService;
 global using Eduversity.com.Client.Services.DepartmentHeadService;
 global using Eduversity.com.Client.Services.DepartmentOptionService;
 global using Eduversity.com.Client.Services.DepartmentService;
+global using Eduversity.com.Client.Services.EmailService;
 global using Eduversity.com.Client.Services.FacultyService;
 global using Eduversity.com.Client.Services.GenderService;
 global using Eduversity.com.Client.Services.LecturerService;
@@ -53,6 +54,8 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IUserAddressService, UserAddressService>();
 

@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\AuthService\AuthService.cs~RF38328b14.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="MailKit" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />

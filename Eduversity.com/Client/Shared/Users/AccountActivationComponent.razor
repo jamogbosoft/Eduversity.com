@@ -1,0 +1,115 @@
+﻿@inject IAuthService authService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+
+@if (!resendToken)
+{
+    <div class="card shadow m-0">
+        <div class="card-header">
+            <h5 class="my-main-title">Activate Your Account</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model="user" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="col-12 row" style="font-weight:bold">
+                    <span class="@messageCssClass col-12 mb-3">@message</span>
+                </div>
+                <div class="col-12 row mb-2">
+                    <h6 class="alert alert-info"> <br>
+                        @if (SignUpMessage is not null)
+                        {
+                            <span>@SignUpMessage</span>
+                        }
+                        else
+                        {
+                            <span>If you have your email verification token, enter it here.</span>
+                        }
+                    </h6>
+                </div>
+                <div class="col-12 row mb-4">
+                    <InputText id="email" @bind-Value="user.Email" class="form-control rounded-pill" placeholder="Email Address" disabled="@disableEmail" />
+                    <ValidationMessage For="@(() => user.Email)" />
+                </div> 
+                <div class="col-12 row mb-4">
+                    <InputText id="token" @bind-Value="user.Token" class="form-control rounded-pill" placeholder="Email Verification Token" />
+                    <ValidationMessage For="@(() => user.Token)" />
+                </div>                
+                <div class="col-12 row">
+                    <span class="col-12"></span>
+                    <button type="submit" class="btn btn-primary btncol mb-3">Activate</button>
+                    <span class="spancol"></span>
+                    <button @onclick="ResendToken" class="btn btn-secondary btncol mb-3">Resend Token</button>
+                </div>                
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <ResendVerificationTokenComponent EmailAddress="@user.Email" CancelEvent="CancelResendToken" />
+}
+
+@code {
+
+    UserEmailVerificationRequest user = new UserEmailVerificationRequest();
+
+    [Parameter]
+    public string? EmailAddress { get; set; }
+
+    [Parameter]
+    public string? SignUpMessage { get; set; }
+
+    string message = string.Empty;
+    string messageCssClass = string.Empty;
+    bool disableEmail = false;
+    bool resendToken = false;
+    bool cancelResendToken = false;
+
+    protected override void OnParametersSet()
+    {
+        if (EmailAddress is not null)
+        {
+            user.Email = EmailAddress;
+            disableEmail = true;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            messageCssClass = "text-info";
+            message = "Processing...";
+
+            var result = await authService.VerifyEmailAsync(user);
+
+            if (result.Success)
+            {
+                message = "Your account activation is successful. Please, login into your account.";
+                toastService.ShowWarning(message);
+                navigationManager.NavigateTo("");
+            }
+            else
+            {
+                messageCssClass = "text-warning";
+                message = result.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            messageCssClass = "text-danger";
+            toastService.ShowError(ex.Message);
+        }
+    }
+
+    private void ResendToken()
+    {
+        resendToken = true; //navigationManager.NavigateTo("/resend-activation-token");
+    }
+
+    private async void CancelResendToken()
+    {
+        resendToken = false;
+    }
+}

@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.WebUtilities
-@inject IAuthService authService
+﻿@inject IAuthService authService
 @inject IToastService toastService
 @inject ILocalStorageService localStorage
 @inject NavigationManager navigationManager
@@ -35,6 +34,10 @@
             <div class="col-12">
                 <br />
                 <a href="/forgot-password" class="col-12">Forgot password?</a>
+            </div>  
+            <div class="col-12">
+                <br />
+                <a href="/account-activation" class="col-12">Activate my account?</a>
             </div>
             <br />
         </EditForm>
@@ -55,16 +58,14 @@
 
     string returnUrl = string.Empty;
 
-    //protected override void OnInitialized()
-    protected async override Task OnInitializedAsync()
+    protected override void OnInitialized()    
     {
+        user.Role = Role;
         var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var url))
         {
             returnUrl = url!;
         }
-
-        user.Role = Role;
     }
 
     private async Task HandleSignIn()

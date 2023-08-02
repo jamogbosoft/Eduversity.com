@@ -1,0 +1,78 @@
+﻿@inject IAuthService authService
+@inject IToastService toastService
+@inject NavigationManager navigationManager
+
+<div class="card shadow m-0">
+    <div class="card-header">
+        <h5 class="my-main-title">Resend Activation Token</h5>
+    </div>
+    <div class="card-body">
+        <EditForm Model="user" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="col-12 row" style="font-weight:bold">
+                <span class="@messageCssClass col-12 mb-3">@message</span>
+            </div>
+            <div class="col-12 row mb-4">
+                <InputText id="email" @bind-Value="user.Email" class="form-control rounded-pill" placeholder="Email Address" />
+                <ValidationMessage For="@(() => user.Email)" />
+            </div>
+
+            <div class="col-12 row">
+                <span class="col-12"></span>
+                <button type="submit" class="btn btn-primary btncol mb-3">Resend</button>
+                <span class="spancol"></span>
+                <button @onclick="HandleCancel" class="btn btn-danger btncol mb-3">Cancel</button>
+            </div>
+            <br />
+        </EditForm>
+    </div>
+</div>
+
+@code {
+
+    UserResendVerificationTokenRequest user = new UserResendVerificationTokenRequest();
+
+    [Parameter]
+    public string? EmailAddress { get; set; }
+    [Parameter]
+    public EventCallback CancelEvent { get; set; }
+
+    string message = string.Empty;
+    string messageCssClass = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (EmailAddress is not null)
+        {
+            user.Email = EmailAddress;
+        }
+    }
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            messageCssClass = "text-info";
+            message = "Processing...";
+
+            var result = await authService.ResendVerificationTokenAsync(user);
+
+            message = result.Message;
+            if (!result.Success)
+            {
+                messageCssClass = "text-warning";
+                toastService.ShowWarning(message);
+            }
+        }
+        catch (Exception ex)
+        {
+            messageCssClass = "text-danger";
+            toastService.ShowError(ex.Message);
+        }
+    }
+
+    public async Task HandleCancel()
+    {
+        await CancelEvent.InvokeAsync();  //navigationManager.NavigateTo("/account-activation");
+    }
+}

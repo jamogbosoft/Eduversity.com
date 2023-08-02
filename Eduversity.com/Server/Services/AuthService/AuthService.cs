@@ -10,14 +10,17 @@ namespace Eduversity.com.Server.Services.AuthService
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEmailService _emailService;
 
         public AuthService(DataContext context,
             IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IEmailService emailService)
         {
             _context = context;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _emailService = emailService;
         }
 
         public long GetUserId() => long.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -30,8 +33,8 @@ namespace Eduversity.com.Server.Services.AuthService
             var user = await _context.Users
                     .Include(u => u.UserRole)
                     .ThenInclude(ur => ur!.Role)
-                    .FirstOrDefaultAsync(u => 
-                        u.UserName.ToLower().Equals(request.UserName.ToLower()) && 
+                    .FirstOrDefaultAsync(u =>
+                        u.UserName.ToLower().Equals(request.UserName.ToLower()) &&
                         u.UserRole!.Role!.Name.ToLower().Equals(request.Role.ToLower())
                      );
 
@@ -61,7 +64,9 @@ namespace Eduversity.com.Server.Services.AuthService
 
         public async Task<ServiceResponse<long>> SignUpAsync(UserRegisterRequest request)
         {
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == request.Role);
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name.ToLower().Equals(request.Role.ToLower()));
+
             if (role == null)
             {
                 return new ServiceResponse<long>
@@ -99,14 +104,23 @@ namespace Eduversity.com.Server.Services.AuthService
             };
             _context.UserRoles.Add(userRole);
             await _context.SaveChangesAsync();
-
+            
+            //Then send the Verification Token to the user's email here
+            var emailRespose = await SendVerificationTokenEmail(user);
+            if (!emailRespose.Success)
+            {
+                return new ServiceResponse<long>
+                {
+                    Success = false,
+                    Message = "Could not sent email. Contact the admin."
+                };
+            }
             return new ServiceResponse<long> { Data = user.Id, Message = "Registration successful!" };
         }
 
         public async Task<bool> UserExists(string username)
         {
-            if (await _context.Users.AnyAsync(u => u.UserName.ToLower()
-                 .Equals(username.ToLower())))
+            if (await _context.Users.AnyAsync(u => u.UserName.ToLower().Equals(username.ToLower())))
             {
                 return true;
             }
@@ -135,21 +149,11 @@ namespace Eduversity.com.Server.Services.AuthService
 
         private string CreateRandomToken()
         {
-            return Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
         }
 
         private string CreateJwtToken(User user)
         {
-            /*
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),
-               // new Claim(ClaimTypes.Role, "Admin")   /////////////////\\\\\\\\\\\\\\
-               //new Claim(ClaimTypes.Role, "Lecturer") //////////////////\\\\\\\\\\\\\\\
-            };
-            */
-
             if (user == null)
             {
                 throw new Exception("Invalid User");
@@ -175,7 +179,7 @@ namespace Eduversity.com.Server.Services.AuthService
 
             var token = new JwtSecurityToken(
                     claims: claimsIdentity.Claims,
-                    expires: DateTime.Now.AddDays(1),
+                    expires: DateTime.Now.AddHours(1),
                     signingCredentials: creds);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
@@ -215,16 +219,19 @@ namespace Eduversity.com.Server.Services.AuthService
 
         public async Task<User> GetUserByUserName(string username)
         {
-            var response = await _context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(username));
+            var response = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName.ToLower().Equals(username.ToLower()));
+
             return response!;
         }
 
-        public async Task<ServiceResponse<bool>> VerifyEmailAsync(VerifyEmailRequest request)
+        public async Task<ServiceResponse<bool>> VerifyEmailAsync(UserEmailVerificationRequest request)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => 
-                    u.VerificationToken! == request.Token &&
-                    u.Email == request.Email);
+                .FirstOrDefaultAsync(u =>
+                    u.VerificationToken!.Equals(request.Token) &&
+                    u.Email.ToLower().Equals(request.Email.ToLower()) &&
+                    u.VerifiedAt == null);
 
             if (user == null)
             {
@@ -243,7 +250,9 @@ namespace Eduversity.com.Server.Services.AuthService
 
         public async Task<ServiceResponse<bool>> ForgotPasswordAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email.ToLower().Equals(email.ToLower()));
+
             if (user == null)
             {
                 return new ServiceResponse<bool>
@@ -254,18 +263,33 @@ namespace Eduversity.com.Server.Services.AuthService
             }
 
             user.PasswordResetToken = CreateRandomToken();
-            user.ResetTokenExpires = DateTime.Now.AddDays(1);
+            user.ResetTokenExpires = DateTime.Now.AddHours(1);
             await _context.SaveChangesAsync();
 
-            return new ServiceResponse<bool> { Data = true, Message = "Please, check your email for the password reset token." };
+            //Then Send PasswordResetToken to the user email here
+            var emailRespose = await SendPasswordResetTokenEmail(user);
+            if (!emailRespose.Success)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Could not sent email. Contact the admin."
+                };
+            }
+
+            return new ServiceResponse<bool>
+            {
+                Data = true,
+                Message = "Please, check your email for the password reset token."
+            };
         }
 
-        public async Task<ServiceResponse<bool>> ResetPasswordAsync(ResetPasswordRequest request)
+        public async Task<ServiceResponse<bool>> ResetPasswordAsync(UserPasswordResetRequest request)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => 
-                    u.PasswordResetToken == request.Token && 
-                    u.Email == request.Email);
+                .FirstOrDefaultAsync(u =>
+                    u.PasswordResetToken!.Equals(request.Token) &&
+                    u.Email.ToLower().Equals(request.Email.ToLower()));
 
             if (user == null || user.ResetTokenExpires < DateTime.Now)
             {
@@ -276,7 +300,7 @@ namespace Eduversity.com.Server.Services.AuthService
                 };
             }
 
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
 
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
@@ -284,7 +308,67 @@ namespace Eduversity.com.Server.Services.AuthService
             user.ResetTokenExpires = null;
 
             await _context.SaveChangesAsync();
+
             return new ServiceResponse<bool> { Data = true, Message = "Password reset is successful." };
+        }
+
+        public async Task<ServiceResponse<bool>> ResendVerificationTokenAsync(string email)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email.ToLower().Equals(email.ToLower()) && u.VerifiedAt == null);
+
+            if (user == null)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "User not found or account already activated."
+                };
+            }
+
+            user.VerificationToken = CreateRandomToken();
+            await _context.SaveChangesAsync();
+
+            //Then send the Verification Token to the user's email here
+            var emailRespose = await SendVerificationTokenEmail(user);
+            if (!emailRespose.Success)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = "Could not sent email. Contact the admin."
+                };
+            }
+
+            return new ServiceResponse<bool>
+            {
+                Data = true,
+                Message = "Please, check your email for your verification token."
+            };
+        }
+
+        private async Task<ServiceResponse<bool>> SendVerificationTokenEmail(User user)
+        {
+            var email = new EmailResponse
+            {
+                To = user.Email,
+                Subject = "Clifford University, Owerrinta",
+                Body = $"<h6>Your email verification token is <br> {user.VerificationToken}</h6>"
+            };
+            var response = await _emailService.SendEmail(email);
+            return response;
+        }
+
+        private async Task<ServiceResponse<bool>> SendPasswordResetTokenEmail(User user)
+        {
+            var email = new EmailResponse
+            {
+                To = user.Email,
+                Subject = "Clifford University, Owerrinta",
+                Body = $"<div style='position: absolute; text-align: center; font-weight: bold;color: #fff; background-color: #1b6ec2; border-color: #1861ac;'><h3>Your password reset token is </h3><h5>{user.PasswordResetToken}</h5><h6>This token expires at {user.ResetTokenExpires}</h6></div>"
+            };
+            var response = await _emailService.SendEmail(email);
+            return response;
         }
     }
 }

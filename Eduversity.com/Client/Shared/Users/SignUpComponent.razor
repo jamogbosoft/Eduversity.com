@@ -1,15 +1,18 @@
 ﻿@inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navigationManager
-@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+@inject ILocalStorageService localStorageService
 @inject IAuthService authService
 @inject IToastService toastService
 
+@if (!activateAccount)
+{
+  
 <div class="card shadow m-0">
     <div class="card-header">
         <h5 class="my-main-title">@MainTitle</h5>
     </div>
     <div class="card-body">
-        <EditForm Model="user" OnValidSubmit="HandleRegistration">
+        <EditForm Model="user" OnValidSubmit="HandleRegister">
             <DataAnnotationsValidator></DataAnnotationsValidator>
 
             <div class="col-12 row" style="font-weight:bold">
@@ -31,12 +34,17 @@
                 <span class="col-12"></span>
                 <button type="submit" class="btn btn-primary col-6">Sign up</button>
                 <a href="/@Role.ToLower()/signin" class="col-6">Already a user?</a>
-            </div>
+            </div>            
             <br />
 
         </EditForm>
     </div>
 </div>
+}
+else
+{
+    <AccountActivationComponent EmailAddress="@user.UserName" SignUpMessage="@message" />
+}
 @code {
 
     [Parameter]
@@ -48,13 +56,14 @@
 
     string message = string.Empty;
     string messageCssClass = string.Empty;
+    bool activateAccount = false;
 
     protected override void OnInitialized()
     {
         user.Role = Role;
     }
 
-    async Task HandleRegistration()
+    async Task HandleRegister()
     {
         try
         {
@@ -65,8 +74,9 @@
             if (result.Success)
             {
                 messageCssClass = "text-success";
-                message += $" Check your email '{user.UserName}' for the activation code";               //" Login into your account.";
+                message += $" Check your email '{user.UserName}' for your email verification token"; //" Login into your account.";
                 toastService.ShowSuccess(message);
+                activateAccount = true;
             }
             else
             {

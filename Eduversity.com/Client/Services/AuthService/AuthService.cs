@@ -18,6 +18,13 @@
             return response!;
         }
 
+        public async Task<ServiceResponse<bool>> ForgotPasswordAsync(UserForgotPasswordRequest request)
+        {
+            var result = await _http.PostAsJsonAsync("api/auth/forgot-password", request);
+            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
+            return response!;
+        }
+
         public async Task<bool> IsUserAuthenticated()
         {
             // return (await _authStateProvider.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated;
@@ -38,6 +45,27 @@
         {
             var result = await _http.PostAsJsonAsync("api/auth/register", request);
             var response = await result.Content.ReadFromJsonAsync<ServiceResponse<long>>();
+            return response!;
+        }
+
+        public async Task<ServiceResponse<bool>> ResetPasswordAsync(UserPasswordResetRequest request)
+        {
+            var result = await _http.PostAsJsonAsync("api/auth/reset-password", request);
+            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
+            return response!;
+        }
+
+        public async Task<ServiceResponse<bool>> VerifyEmailAsync(UserEmailVerificationRequest request)
+        {
+            var result = await _http.PostAsJsonAsync("api/auth/verify-email", request);
+            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
+            return response!;
+        }
+
+        public async Task<ServiceResponse<bool>> ResendVerificationTokenAsync(UserResendVerificationTokenRequest request)
+        {
+            var result = await _http.PostAsJsonAsync("api/auth/resend-verification-token", request);
+            var response = await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();
             return response!;
         }
     }

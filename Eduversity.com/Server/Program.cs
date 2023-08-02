@@ -8,6 +8,7 @@ global using Eduversity.com.Server.Services.CourseStructureService;
 global using Eduversity.com.Server.Services.DepartmentHeadService;
 global using Eduversity.com.Server.Services.DepartmentOptionService;
 global using Eduversity.com.Server.Services.DepartmentService;
+global using Eduversity.com.Server.Services.EmailService;
 global using Eduversity.com.Server.Services.FacultyService;
 global using Eduversity.com.Server.Services.LecturerService;
 global using Eduversity.com.Server.Services.LGAService;
@@ -20,6 +21,7 @@ global using Eduversity.com.Shared.Dtos.CourseDto;
 global using Eduversity.com.Shared.Dtos.CourseStructureDto;
 global using Eduversity.com.Shared.Dtos.DepartmentDto;
 global using Eduversity.com.Shared.Dtos.DepartmentOptionDto;
+global using Eduversity.com.Shared.Dtos.EmailDto;
 global using Eduversity.com.Shared.Dtos.FacultyDto;
 global using Eduversity.com.Shared.Dtos.LecturerDto;
 global using Eduversity.com.Shared.Dtos.LGADto;
@@ -60,6 +62,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<IUserAddressService, UserAddressService>();
 
 builder.Services.AddScoped<ICountryService, CountryService>();
@@ -98,12 +102,15 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-app.UseSwaggerUI();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+
+    app.UseSwaggerUI();
+    app.UseSwagger();
 }
 else
 {
@@ -112,7 +119,7 @@ else
     app.UseHsts();
 }
 
-app.UseSwagger();
+
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
