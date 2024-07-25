@@ -5,14 +5,16 @@
             <Found Context="routeData">
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" >
                     <NotAuthorized>
-                        <UnAuthorizedPrompt />
+                        <LayoutView Layout="@typeof(AppLayout)">
+                            <UnAuthorizedPrompt />
+                        </LayoutView>                       
                     </NotAuthorized>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             </Found>
             <NotFound>
                 <PageTitle>Not found</PageTitle>
-                <LayoutView Layout="@typeof(MainLayout)">
+                <LayoutView Layout="@typeof(AppLayout)">
                     <AlertPrompt Title="Page Not Found!" Message="Sorry, there's nothing at this address." />
                 </LayoutView>
             </NotFound>

@@ -1,4 +1,4 @@
-﻿
+﻿@layout AppLayout
 @inherits LayoutComponentBase
 
 <div class="page">
@@ -14,16 +14,5 @@
         <article class="content px-4">
             @Body
         </article>
-
-        <BlazoredToasts Position="ToastPosition.BottomRight"
-                        Timeout="30"
-                        IconType="IconType.FontAwesome"
-                        SuccessClass="success-toast-override"
-                        SuccessIcon="fa fa-check"
-                        ErrorIcon="fa fa-times"
-                        InfoIcon="fa fa-info"
-                        WarningClass="fa fa-bug"
-                        ShowProgressBar="true">
-        </BlazoredToasts>
     </main>
-</div>
+ </div>
